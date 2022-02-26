@@ -1,0 +1,8 @@
+:fib [
+	dup print
+	dup 2 > [
+		1 fib
+	] if
+] define
+
+3 fib print
