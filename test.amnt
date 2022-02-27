@@ -7,8 +7,9 @@
 
 :fibonacci # Int -> Int # [
 	:n swap define
-	n 2 < [n] if
-	n 2 >= [
+	n 2 < [
+		n
+	] [
 		:fnow 0 define
 		:fnext 1 define
 		:tempf 0 define
@@ -19,12 +20,12 @@
 			:n n 1 - define
 		] while
 		fnext
-	] if
+	] ifelse
 ] define
 
 :project_euler_one # Int -> Void # [
-	:i 0 define
-	:sum 0 define
+	:i 0 localdefine
+	:sum 0 localdefine
 	[ i 1000 < ] [
 		i is_multiple_of_3_or_5 [:sum sum i + define] if
 		:i i 1 + define
@@ -64,7 +65,31 @@
 :project_euler_three [
 	600851475143 largest_prime_factor print
 ] define
+
 project_euler_one
 project_euler_two
 project_euler_three
-4_00_000.32781 print
+
+:programmed_forever [
+	[1] swap while
+] define
+:programmed_if [
+	[] ifelse
+] define
+1 ["HELLO" print] programmed_if
+
+#
+232792560 is_evenly_divisible_by_1_to_20 print
+:acc 1 define
+1 21 range :current [
+	:acc acc current * define
+] for
+acc print
+
+
+:acc 0 define [ :acc acc 1 + define acc 10_000 % 0 = [ acc print ] if ] forever
+
+:summation 0 define
+1 10_000_000 range :acc [ :summation summation acc + define ] for
+summation print
+#

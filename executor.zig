@@ -8,18 +8,20 @@ const StackItem = struct { item_type: enum {
     Atom,
     Float,
     TokenList,
-    GeneratedIntList,
+    FloatList,
 }, data: union {
     text: []const u8,
     float: f64,
     token_list: []lexer.Token,
-    int_list: []i128,
+    float_list: []f64,
 } };
 
 const Stack = struct {
     list: std.ArrayList(StackItem) = undefined,
     variables: std.StringHashMap(StackItem) = undefined,
+    stack_allocator: std.mem.Allocator = undefined,
     fn init(self: *Stack, alloc: std.mem.Allocator) !void {
+        self.stack_allocator = alloc;
         self.list = try std.ArrayList(StackItem).initCapacity(alloc, 1024);
         self.variables = std.StringHashMap(StackItem).init(alloc);
     }
@@ -35,7 +37,6 @@ const Stack = struct {
     fn builtin_define(self: *Stack) !void {
         const value = self.list.pop();
         const key = self.list.pop();
-        // print("DEBUG :: DEFINE :: {any} @ {any}\n",.{key,value.data.token_list});
         try self.variables.put(key.data.text, value);
     }
     fn builtin_if(
@@ -52,15 +53,21 @@ const Stack = struct {
             }
         }
     }
-    fn builtin_forever(
+    fn builtin_ifelse(
         self: *Stack,
         raw_data: []const u8,
         bracket_depth: *u64,
         current_token_list: *std.ArrayList(lexer.Token),
     ) anyerror!void {
-        const clause = self.list.pop();
-        while (true) {
-            for (clause.data.token_list) |tok| {
+        const elseclause = self.list.pop();
+        const ifclause = self.list.pop();
+        const condition = self.list.pop();
+        if (condition.data.float == 1) {
+            for (ifclause.data.token_list) |tok| {
+                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+            }
+        } else {
+            for (elseclause.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
             }
         }
@@ -73,15 +80,47 @@ const Stack = struct {
     ) anyerror!void {
         const clause = self.list.pop();
         const condition = self.list.pop();
-        while(true){
+        while (true) {
             for (condition.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
             }
-            if (self.list.pop().data.float == 0) {break;}
+            if (self.list.pop().data.float == 0) {
+                break;
+            }
             for (clause.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
             }
-
+        }
+    }
+    fn builtin_range(self: *Stack) !void {
+        const end = self.list.pop().data.float;
+        const start = self.list.pop();
+        var i = start.data.float;
+        var float_list = std.ArrayList(f64).init(self.stack_allocator);
+        while (i < end) : (i += 1) {
+            try float_list.append(i);
+        }
+        try self.append(StackItem{ .item_type = .FloatList, .data = .{ .float_list = float_list.toOwnedSlice() } });
+    }
+    fn builtin_for(
+        self: *Stack,
+        raw_data: []const u8,
+        bracket_depth: *u64,
+        current_token_list: *std.ArrayList(lexer.Token),
+    ) anyerror!void {
+        const clause = self.list.pop();
+        const var_name = self.list.pop();
+        const list = self.list.pop();
+        switch (list.item_type) {
+            .FloatList => {
+                for (list.data.float_list) |fl| {
+                    try self.variables.put(var_name.data.text, self.create_float(fl));
+                    for (clause.data.token_list) |tok| {
+                        try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                    }
+                }
+            },
+            else => unreachable,
         }
     }
     fn builtin_print(self: *Stack) !void {
@@ -91,9 +130,8 @@ const Stack = struct {
                 print("{s}", .{top.data.text});
             },
             .Float => {
-                if (std.math.floor(top.data.float) == top.data.float){
-                    print("{}",.{@floatToInt(i128, top.data.float)});
-
+                if (std.math.floor(top.data.float) == top.data.float) {
+                    print("{}", .{@floatToInt(i128, top.data.float)});
                 } else {
                     print("{}", .{top.data.float});
                 }
@@ -121,12 +159,13 @@ const Stack = struct {
         current_token_list: *std.ArrayList(lexer.Token),
     ) anyerror!void {
         var function_contents = self.variables.get(name).?;
-        // print("DEBUG :: CALL_FUNC :: {any}\n",.{function_contents});
         switch (function_contents.item_type) {
             .TokenList => {
-                // print("DEBUG :: LIST_FUNC_PRELOOP :: {any}\n",.{function_contents.data.token_list});
                 for (function_contents.data.token_list) |tok| {
-                    // print("DEBUG :: LIST_FUNC :: {any}\n",.{tok});
+                    if (tok.id == .BuiltinReturn) {
+                        bracket_depth.* = 0;
+                        return;
+                    }
                     try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
                 }
             },
@@ -202,7 +241,6 @@ fn execute_single_token(
     current_token_list: *std.ArrayList(lexer.Token),
     stack: *Stack,
 ) !void {
-    // print("DEBUG :: EXECUTE_TOKEN :: {any}\n",.{t});
     if (bracket_depth.* == 0) {
         switch (t.id) {
             .Eof, .Comment => {},
@@ -229,6 +267,9 @@ fn execute_single_token(
                     current_token_list,
                 );
             },
+            .BuiltinRange => {
+                try stack.*.builtin_range();
+            },
             .BuiltinPrint => {
                 try stack.*.builtin_print();
             },
@@ -239,8 +280,8 @@ fn execute_single_token(
                     current_token_list,
                 );
             },
-            .BuiltinForever => {
-                try stack.*.builtin_forever(
+            .BuiltinIfElse => {
+                try stack.*.builtin_ifelse(
                     raw_data,
                     bracket_depth,
                     current_token_list,
@@ -250,13 +291,19 @@ fn execute_single_token(
                 try stack.*.builtin_define();
             },
             .BuiltinRequireStack => {},
+            .BuiltinFor => {
+                try stack.*.builtin_for(
+                    raw_data,
+                    bracket_depth,
+                    current_token_list,
+                );
+            },
             .BuiltinWhile => {
                 try stack.*.builtin_while(
                     raw_data,
                     bracket_depth,
                     current_token_list,
                 );
-
             },
             .BuiltinDup => {
                 try stack.*.builtin_dup();
@@ -297,7 +344,7 @@ fn execute_single_token(
             .OperatorGreaterThanOrEqual => {
                 try stack.*.operator_gteq();
             },
-            else => {}
+            else => {},
         }
     } else {
         switch (t.id) {
@@ -333,8 +380,4 @@ pub fn execute(alloc: std.mem.Allocator, tokens: []const lexer.Token, raw_data: 
     for (tokens) |t| {
         try execute_single_token(t, raw_data, &bracket_depth, &current_token_list, &stack);
     }
-    // var v_iter = stack.variables.iterator();
-    // while (v_iter.next()) |vari| {
-    //    print("{s} :: {s}\n",.{vari.key_ptr.*,vari.value_ptr.*});
-    // }
 }
