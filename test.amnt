@@ -1,8 +1,70 @@
-:fib [
-	dup print
-	dup 2 > [
-		1 fib
+:is_multiple_of_3_or_5 # Int -> Int # [
+	:x 0 define
+	dup 3 % 0 = [:x 1 define] if
+	5 % 0 = [:x 1 define] if
+	x
+] define
+
+:fibonacci # Int -> Int # [
+	:n swap define
+	n 2 < [n] if
+	n 2 >= [
+		:fnow 0 define
+		:fnext 1 define
+		:tempf 0 define
+		[ n 0 > ] [
+			:tempf fnow fnext + define
+			:fnow fnext define
+			:fnext tempf define
+			:n n 1 - define
+		] while
+		fnext
 	] if
 ] define
 
-3 fib print
+:project_euler_one # Int -> Void # [
+	:i 0 define
+	:sum 0 define
+	[ i 1000 < ] [
+		i is_multiple_of_3_or_5 [:sum sum i + define] if
+		:i i 1 + define
+	] while
+	sum print
+] define
+
+:project_euler_two # Int -> Void # [
+	:j 1 define
+	:sum 0 define
+	:value 0 define
+	[ :value j fibonacci define value 4000000 < ] [
+		value 2 % 0 = [:sum sum value + define] if
+		:j j 1 + define
+	] while
+	sum print
+] define
+
+:square # Int -> Int # [
+	dup *
+] define
+
+:largest_prime_factor # Int -> Int # [
+	:i 2 define
+	:n swap define
+	[ i square n <= ] [
+		n i % 0 != [
+			:i i 1 + define
+		] if
+		n i % 0 = [
+			:n n i / define
+		] if
+	] while
+	n
+] define
+
+:project_euler_three [
+	600851475143 largest_prime_factor print
+] define
+project_euler_one
+project_euler_two
+project_euler_three
+4_00_000.32781 print

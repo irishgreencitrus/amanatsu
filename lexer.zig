@@ -62,11 +62,12 @@ pub const Token = struct {
         BuiltinStrToFloat,
         BuiltinStrToInt,
         BuiltinSwap,
+        BuiltinWhile,
         Comment,
         Eof,
-        Floating,
+        Float,
         Function,
-        Integer,
+        //Integer,
         OperatorDivide,
         OperatorEqual,
         OperatorGreaterThan,
@@ -101,6 +102,7 @@ pub const Token = struct {
         .{ "require_stack", .BuiltinRequireStack },
         .{ "if", .BuiltinIf },
         .{ "for", .BuiltinFor },
+        .{ "while", .BuiltinWhile },
         .{ "forever", .BuiltinForever },
         .{ "print", .BuiltinPrint },
         .{ "float2int", .BuiltinFloatToInt },
@@ -264,7 +266,7 @@ pub const Tokenizer = struct {
                     },
                     else => {
                         self.it.i -= unicode.utf8CodepointSequenceLength(c) catch unreachable;
-                        res = .Integer;
+                        res = .Float;
                         break;
                     },
                 },
@@ -273,14 +275,14 @@ pub const Tokenizer = struct {
                         state = .NumberFractional;
                     },
                     else => {
-                        return self.reportError("Floating number requires digits after decimal point.", c);
+                        return self.reportError("Float number requires digits after decimal point.", c);
                     },
                 },
                 .NumberFractional => switch (c) {
                     '0'...'9', '_' => {},
                     else => {
                         self.it.i -= unicode.utf8CodepointSequenceLength(c) catch unreachable;
-                        res = .Floating;
+                        res = .Float;
                         break;
                     },
                 },
@@ -391,18 +393,18 @@ test "project_euler_one_snip" {
         .Atom,
         .BracketLeft,
         .Atom,
-        .Integer,
+        .Float,
         .Function,
-        .Integer,
-        .Integer,
+        .Float,
+        .Float,
         .Function,
         .Atom,
         .BracketLeft,
         .BracketLeft,
         .Function,
-        .Integer,
+        .Float,
         .OperatorModulo,
-        .Floating,
+        .Float,
         .OperatorEqual,
     });
 }
@@ -419,7 +421,7 @@ test "fibonnaci_func" {
         .Function,
         .BracketLeft,
         .Function,
-        .Integer,
+        .Float,
         .OperatorLessThanOrEqual,
         .BracketRight,
         .BracketLeft,
@@ -427,11 +429,11 @@ test "fibonnaci_func" {
         .BracketRight,
         .Function,
         .Function,
-        .Integer,
+        .Float,
         .OperatorMinus,
         .Function,
         .Function,
-        .Integer,
+        .Float,
         .OperatorMinus,
         .Function,
         .Function,

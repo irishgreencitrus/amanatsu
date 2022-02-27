@@ -5,15 +5,13 @@ const lexer = @import("lexer.zig");
 
 const StackItem = struct { item_type: enum {
     String,
-    Integer,
     Atom,
     Float,
     TokenList,
     GeneratedIntList,
 }, data: union {
     text: []const u8,
-    integer: i128,
-    float: f128,
+    float: f64,
     token_list: []lexer.Token,
     int_list: []i128,
 } };
@@ -25,8 +23,8 @@ const Stack = struct {
         self.list = try std.ArrayList(StackItem).initCapacity(alloc, 1024);
         self.variables = std.StringHashMap(StackItem).init(alloc);
     }
-    fn create_int(_: *Stack, value: i128) StackItem {
-        return StackItem{ .item_type = .Integer, .data = .{ .integer = value } };
+    fn create_float(_: *Stack, value: f64) StackItem {
+        return StackItem{ .item_type = .Float, .data = .{ .float = value } };
     }
     fn create_string(_: *Stack, value: []const u8) StackItem {
         return StackItem{ .item_type = .String, .data = .{ .text = value } };
@@ -48,7 +46,7 @@ const Stack = struct {
     ) anyerror!void {
         const clause = self.list.pop();
         const condition = self.list.pop();
-        if (condition.data.integer == 1) {
+        if (condition.data.float == 1) {
             for (clause.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
             }
@@ -67,17 +65,38 @@ const Stack = struct {
             }
         }
     }
+    fn builtin_while(
+        self: *Stack,
+        raw_data: []const u8,
+        bracket_depth: *u64,
+        current_token_list: *std.ArrayList(lexer.Token),
+    ) anyerror!void {
+        const clause = self.list.pop();
+        const condition = self.list.pop();
+        while(true){
+            for (condition.data.token_list) |tok| {
+                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+            }
+            if (self.list.pop().data.float == 0) {break;}
+            for (clause.data.token_list) |tok| {
+                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+            }
+
+        }
+    }
     fn builtin_print(self: *Stack) !void {
         const top = self.list.pop();
         switch (top.item_type) {
-            .Integer => {
-                print("{}", .{top.data.integer});
-            },
             .Atom, .String => {
                 print("{s}", .{top.data.text});
             },
             .Float => {
-                print("{}", .{top.data.float});
+                if (std.math.floor(top.data.float) == top.data.float){
+                    print("{}",.{@floatToInt(i128, top.data.float)});
+
+                } else {
+                    print("{}", .{top.data.float});
+                }
             },
             else => {},
         }
@@ -91,8 +110,8 @@ const Stack = struct {
     fn builtin_swap(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(b);
         try self.append(a);
+        try self.append(b);
     }
     fn execute_function(
         self: *Stack,
@@ -123,57 +142,57 @@ const Stack = struct {
     fn operator_plus(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(b.data.integer + a.data.integer));
+        try self.append(self.create_float(b.data.float + a.data.float));
     }
     fn operator_minus(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(b.data.integer - a.data.integer));
+        try self.append(self.create_float(b.data.float - a.data.float));
     }
     fn operator_divide(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@divTrunc(b.data.integer, a.data.integer)));
+        try self.append(self.create_float(b.data.float / a.data.float));
     }
     fn operator_multiply(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(b.data.integer * a.data.integer));
+        try self.append(self.create_float(b.data.float * a.data.float));
     }
     fn operator_modulo(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@mod(b.data.integer, a.data.integer)));
+        try self.append(self.create_float(@rem(b.data.float, a.data.float)));
     }
     fn operator_eq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@as(i128, @boolToInt(b.data.integer == a.data.integer))));
+        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float == a.data.float))));
     }
     fn operator_neq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@as(i128, @boolToInt(b.data.integer != a.data.integer))));
+        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float != a.data.float))));
     }
     fn operator_lt(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@as(i128, @boolToInt(b.data.integer < a.data.integer))));
+        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float < a.data.float))));
     }
     fn operator_gt(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@as(i128, @boolToInt(b.data.integer > a.data.integer))));
+        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float > a.data.float))));
     }
     fn operator_lteq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@as(i128, @boolToInt(b.data.integer <= a.data.integer))));
+        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float <= a.data.float))));
     }
     fn operator_gteq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        try self.append(self.create_int(@as(i128, @boolToInt(b.data.integer >= a.data.integer))));
+        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float >= a.data.float))));
     }
 };
 fn execute_single_token(
@@ -193,8 +212,8 @@ fn execute_single_token(
             .BracketRight => {
                 unreachable;
             },
-            .Integer => {
-                try stack.*.append(stack.*.create_int(try fmt.parseInt(i128, raw_data[t.start..t.end], 10)));
+            .Float => {
+                try stack.*.append(stack.*.create_float(try fmt.parseFloat(f64, raw_data[t.start..t.end])));
             },
             .String => {
                 try stack.*.append(stack.*.create_string(raw_data[t.start + 1 .. t.end - 1]));
@@ -230,8 +249,15 @@ fn execute_single_token(
             .BuiltinDefine => {
                 try stack.*.builtin_define();
             },
-            .BuiltinIntToFloat => {},
-            .BuiltinFloatToInt => {},
+            .BuiltinRequireStack => {},
+            .BuiltinWhile => {
+                try stack.*.builtin_while(
+                    raw_data,
+                    bracket_depth,
+                    current_token_list,
+                );
+
+            },
             .BuiltinDup => {
                 try stack.*.builtin_dup();
             },
@@ -271,7 +297,7 @@ fn execute_single_token(
             .OperatorGreaterThanOrEqual => {
                 try stack.*.operator_gteq();
             },
-            else => {},
+            else => {}
         }
     } else {
         switch (t.id) {
@@ -285,10 +311,9 @@ fn execute_single_token(
                     try stack.*.append(StackItem{
                         .item_type = .TokenList,
                         .data = .{
-                            .token_list = current_token_list.items,
+                            .token_list = current_token_list.toOwnedSlice(),
                         },
                     });
-                    current_token_list.*.clearRetainingCapacity();
                 } else {
                     try current_token_list.*.append(t);
                 }
