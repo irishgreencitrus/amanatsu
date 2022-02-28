@@ -1,4 +1,5 @@
 const std = @import("std");
+const errors = @import("errors.zig");
 const mem = std.mem;
 const math = std.math;
 const testing = std.testing;
@@ -123,7 +124,7 @@ pub const Tokenizer = struct {
     fn reportError(self: *Tokenizer, message: []const u8, c: u32) LexerErrors {
         var character: [1]u8 = undefined;
         _ = unicode.utf8Encode(@truncate(u21, c), &character) catch unreachable;
-        std.debug.print("\n\x1b[1;31mERROR {s}: '{s}'\n\x1b[0m", .{ message, character });
+        errors.lexer_panic(message, character);
         self.it.i = self.it.bytes.len;
         return LexerErrors.TokenizerError;
     }

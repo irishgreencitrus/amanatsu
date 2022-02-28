@@ -1,15 +1,17 @@
 const std = @import("std");
+const errors = @import("errors.zig");
 const fmt = std.fmt;
 const print = std.debug.print;
 const lexer = @import("lexer.zig");
 
-const StackItem = struct { item_type: enum {
+const StackType = enum {
     String,
     Atom,
     Float,
     TokenList,
     FloatList,
-}, data: union {
+};
+const StackItem = struct { item_type: StackType, data: union {
     text: []const u8,
     float: f64,
     token_list: []lexer.Token,
@@ -25,6 +27,20 @@ const Stack = struct {
         self.list = try std.ArrayList(StackItem).initCapacity(alloc, 1024);
         self.variables = std.StringHashMap(StackItem).init(alloc);
     }
+    fn item_is(_: *Stack, item: StackItem, required_type: StackType) bool {
+        if (item.item_type == required_type) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    // fn stack_item_is(self: *Stack, nth: u64, required_type: StackType) bool {
+    //     if (self.list[self.list.len - 1 - nth].item_type == required_type) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
     fn create_float(_: *Stack, value: f64) StackItem {
         return StackItem{ .item_type = .Float, .data = .{ .float = value } };
     }
@@ -37,6 +53,9 @@ const Stack = struct {
     fn builtin_define(self: *Stack) !void {
         const value = self.list.pop();
         const key = self.list.pop();
+        if (!self.item_is(key, .Atom)) {
+            errors.executor_panic("'define' expected type Atom as key, got type ",key.item_type);
+        }
         try self.variables.put(key.data.text, value);
     }
     fn builtin_if(
@@ -47,6 +66,12 @@ const Stack = struct {
     ) anyerror!void {
         const clause = self.list.pop();
         const condition = self.list.pop();
+        if (!self.item_is(clause, .TokenList)) {
+            errors.executor_panic("'if' expected type TokenList as clause, got type ",clause.item_type);
+        }
+        if (!self.item_is(condition, .Float)) {
+            errors.executor_panic("'if' expected type Float as condition, got type ",condition.item_type);
+        }
         if (condition.data.float == 1) {
             for (clause.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
@@ -62,6 +87,15 @@ const Stack = struct {
         const elseclause = self.list.pop();
         const ifclause = self.list.pop();
         const condition = self.list.pop();
+        if (!self.item_is(ifclause, .TokenList)) {
+            errors.executor_panic("'ifelse' expected type TokenList as first clause, got type ",ifclause.item_type);
+        }
+        if (!self.item_is(elseclause, .TokenList)) {
+            errors.executor_panic("'ifelse' expected type TokenList as second clause, got type ",elseclause.item_type);
+        }
+        if (!self.item_is(condition, .Float)) {
+            errors.executor_panic("'ifelse' expected type Float as condition, got type ",condition.item_type);
+        }
         if (condition.data.float == 1) {
             for (ifclause.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
@@ -80,6 +114,12 @@ const Stack = struct {
     ) anyerror!void {
         const clause = self.list.pop();
         const condition = self.list.pop();
+        if (!self.item_is(clause, .TokenList)) {
+            errors.executor_panic("'while' expected type TokenList as clause, got type ",clause.item_type);
+        }
+        if (!self.item_is(condition, .TokenList)) {
+            errors.executor_panic("'while' expected type TokenList as condition, got type ",condition.item_type);
+        }
         while (true) {
             for (condition.data.token_list) |tok| {
                 try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
@@ -93,11 +133,17 @@ const Stack = struct {
         }
     }
     fn builtin_range(self: *Stack) !void {
-        const end = self.list.pop().data.float;
+        const end = self.list.pop();
         const start = self.list.pop();
+        if (!self.item_is(start, .Float)) {
+            errors.executor_panic("'range' expected type Float as start, got type ",start.item_type);
+        }
+        if (!self.item_is(end, .Float)) {
+            errors.executor_panic("'range' expected type Float as end, got type ",end.item_type);
+        }
         var i = start.data.float;
         var float_list = std.ArrayList(f64).init(self.stack_allocator);
-        while (i < end) : (i += 1) {
+        while (i < end.data.float) : (i += 1) {
             try float_list.append(i);
         }
         try self.append(StackItem{ .item_type = .FloatList, .data = .{ .float_list = float_list.toOwnedSlice() } });
@@ -111,6 +157,15 @@ const Stack = struct {
         const clause = self.list.pop();
         const var_name = self.list.pop();
         const list = self.list.pop();
+        if (!self.item_is(clause, .TokenList)) {
+            errors.executor_panic("'for' expected type TokenList as clause, got type ",clause.item_type);
+        }
+        if (!self.item_is(var_name, .Atom)) {
+            errors.executor_panic("'for' expected type Atom as iterator variable, got type ",var_name.item_type);
+        }
+        if (!self.item_is(list, .FloatList)) {
+            errors.executor_panic("'for' expected type FloatList as the list to iterate over, got type ",list.item_type);
+        }
         switch (list.item_type) {
             .FloatList => {
                 for (list.data.float_list) |fl| {
@@ -158,21 +213,33 @@ const Stack = struct {
         bracket_depth: *u64,
         current_token_list: *std.ArrayList(lexer.Token),
     ) anyerror!void {
-        var function_contents = self.variables.get(name).?;
-        switch (function_contents.item_type) {
-            .TokenList => {
-                for (function_contents.data.token_list) |tok| {
-                    if (tok.id == .BuiltinReturn) {
-                        bracket_depth.* = 0;
-                        return;
+        var possible_func = self.variables.get(name);
+        
+        if (possible_func) |function_contents| {
+            switch (function_contents.item_type) {
+                .TokenList => {
+                    for (function_contents.data.token_list) |tok| {
+                        if (tok.id == .BuiltinReturn) {
+                            bracket_depth.* = 0;
+                            return;
+                        }
+                        try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
                     }
-                    try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
-                }
-            },
-            else => {
-                try self.append(function_contents);
-            },
+                },
+                else => {
+                    try self.append(function_contents);
+                },
+            }
+        } else {
+            errors.executor_panic("Unknown function ",name);
         }
+    }
+    fn builtin_float2int(self: *Stack) !void {
+        const value = self.list.pop();
+        if (!self.item_is(value,.Float)) {
+            errors.executor_panic("float2int expected Float, got ",value.item_type);
+        }
+        try self.append(self.create_float(@floor(value.data.float)));
     }
 
     fn append(self: *Stack, value: StackItem) !void {
@@ -181,56 +248,89 @@ const Stack = struct {
     fn operator_plus(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Addition operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(b.data.float + a.data.float));
     }
     fn operator_minus(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Subtraction operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(b.data.float - a.data.float));
     }
     fn operator_divide(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Division operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(b.data.float / a.data.float));
     }
     fn operator_multiply(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Multiplication operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(b.data.float * a.data.float));
     }
     fn operator_modulo(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Modulus operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@rem(b.data.float, a.data.float)));
     }
     fn operator_eq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Equality operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float == a.data.float))));
     }
     fn operator_neq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Not equal to operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float != a.data.float))));
     }
     fn operator_lt(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Less than requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float < a.data.float))));
     }
     fn operator_gt(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Greater than requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float > a.data.float))));
     }
     fn operator_lteq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Less than or equal operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float <= a.data.float))));
     }
     fn operator_gteq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
+        if (!(self.item_is(a,.Float) and self.item_is(b,.Float))) {
+            errors.executor_panic("Greater than or equal operator requires two numbers, got ",.{b.item_type, a.item_type});
+        } 
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float >= a.data.float))));
     }
 };
@@ -252,6 +352,9 @@ fn execute_single_token(
             },
             .Float => {
                 try stack.*.append(stack.*.create_float(try fmt.parseFloat(f64, raw_data[t.start..t.end])));
+            },
+            .BuiltinFloatToInt => {
+                try stack.*.builtin_float2int();
             },
             .String => {
                 try stack.*.append(stack.*.create_string(raw_data[t.start + 1 .. t.end - 1]));

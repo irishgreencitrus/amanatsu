@@ -1,7 +1,7 @@
 :is_multiple_of_3_or_5 # Int -> Int # [
 	:x 0 define
-	dup 3 % 0 = [:x 1 define] if
-	5 % 0 = [:x 1 define] if
+	dup 3 % 0 = [:x 1 define] [] ifelse
+	5 % 0 = [:x 1 define] [] ifelse
 	x
 ] define
 
@@ -24,8 +24,8 @@
 ] define
 
 :project_euler_one # Int -> Void # [
-	:i 0 localdefine
-	:sum 0 localdefine
+	:i 0 define
+	:sum 0 define
 	[ i 1000 < ] [
 		i is_multiple_of_3_or_5 [:sum sum i + define] if
 		:i i 1 + define
@@ -66,18 +66,86 @@
 	600851475143 largest_prime_factor print
 ] define
 
-project_euler_one
-project_euler_two
-project_euler_three
 
 :programmed_forever [
 	[1] swap while
 ] define
+
 :programmed_if [
 	[] ifelse
 ] define
-1 ["HELLO" print] programmed_if
 
+:max # [Int Int] -> Int # [
+	:a swap define
+	:b swap define
+	a b > [a] [b] ifelse
+] define
+
+:lcm [
+	:x swap define
+	:y swap define
+	:should_loop 1 define
+	x y max :z swap define
+	[should_loop] [
+		z x % 0 = [
+			z y % 0 = [
+				:should_loop 0 define
+			] if
+		] if
+		:z z 1 + define
+	] while
+	z 1 -
+] define
+
+#
+Warning:
+This function contains things that are hideously unoptimised.
+#
+
+:project_euler_five [
+	:result 1 define
+	1 11 range :xf [
+		:result xf result lcm define
+	] for
+	result print
+] define
+
+:get_palindrome [
+	:num swap define
+	:rev_num 0 define
+	[ num 0 > ]
+	[
+		:rev_num rev_num 10 * num 10 % + define
+		:num num 10 / float2int define
+	] while
+	rev_num
+] define
+
+:is_palindromic [
+	dup get_palindrome =
+] define
+
+:project_euler_four [
+	:largest 0 define
+	100 1000 range :i [
+		100 1000 range :j [
+			:ij i j * define
+			ij largest > [
+				ij is_palindromic [
+					:largest ij define
+				] if
+			] if
+		] for
+	] for
+	largest print
+] define
+project_euler_one
+project_euler_two
+project_euler_three
+# four and five both *technically* work however they are ridiculously inefficient and slow! :)
+project_euler_four
+project_euler_five
+#
 #
 232792560 is_evenly_divisible_by_1_to_20 print
 :acc 1 define
