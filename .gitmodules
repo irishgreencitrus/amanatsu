@@ -1,0 +1,3 @@
+[submodule "pages/themes/zola_easydocs_theme"]
+	path = pages/themes/zola_easydocs_theme
+	url = https://github.com/codeandmedia/zola_easydocs_theme

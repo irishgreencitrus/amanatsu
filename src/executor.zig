@@ -341,6 +341,7 @@ fn execute_single_token(
     current_token_list: *std.ArrayList(lexer.Token),
     stack: *Stack,
 ) !void {
+    //print("DEBUG :: EXECUTE SINGLE TOKEN CALLED WITH {any} {any} {any} {any} {any}\n",.{t , raw_data, bracket_depth.*, current_token_list.*, stack.*});
     if (bracket_depth.* == 0) {
         switch (t.id) {
             .Eof, .Comment => {},

@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+      <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://irishgreencitrus.github.io/amanatsu/main.css">
+      
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+        <title> Amanatsu | Hello World </title> 
+    </head>
+    <body>
+
+      
+    <main>
+
+      
+
+        <nav>
+          
+            <a href="https:&#x2F;&#x2F;irishgreencitrus.github.io&#x2F;amanatsu">
+            <img src="/logo.svg" alt="" />
+                </a>
+            
+            
+          
+
+          
+  
+  <a href="javascript:void(0);" onclick="burger()" id="mobile" class="ms-Icon--GlobalNavButton"></a>
+    <div id="trees">
+               
+            
+                 
+            
+ 
+        <input class="tree-toggle" type="checkbox" id="concatination-explaination" 
+         />
+        <label class="tree-toggle-label" for="concatination-explaination">Concatination Explaination</label>
+                        
+        <ul class="subtree">
+                
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/concatenation_explaination/basics-of-stacks/">Basics of Stacks</a>
+                                </li>
+
+
+
+                   
+    
+    
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/concatenation_explaination/why-use-stacks/">Why Stacks?</a>
+                                </li>
+
+
+
+                   
+    
+    
+    </ul>         
+    
+                 
+            
+ 
+        <input class="tree-toggle" type="checkbox" id="getting-started-with-amanatsu" 
+        checked />
+        <label class="tree-toggle-label" for="getting-started-with-amanatsu">Getting Started with Amanatsu</label>
+                        
+        <ul class="subtree">
+                
+                                <li class="active">
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/getting_started/hello-world/">Hello World</a>
+                                </li>
+
+
+
+ 
+
+  
+  
+    
+    
+  
+
+  
+
+                       
+    
+    
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/getting_started/maths-is-strange/">Maths is Strange</a>
+                                </li>
+
+
+
+                   
+    
+    
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/getting_started/defining-variables/">Defining Variables</a>
+                                </li>
+
+
+
+                   
+    
+    
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/getting_started/iteration-and-recursion/">Iteration and Recursion</a>
+                                </li>
+
+
+    
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/getting_started/the-zen-of-amanatsu/">The Zen of Amanatsu</a>
+                                </li>
+
+
+
+                   
+    
+    
+    </ul>         
+    
+                 
+            
+ 
+        <input class="tree-toggle" type="checkbox" id="roadmap" 
+         />
+        <label class="tree-toggle-label" for="roadmap">Roadmap</label>
+                        
+        <ul class="subtree">
+                
+    </ul>         
+    
+                 
+            
+ 
+        <input class="tree-toggle" type="checkbox" id="the-api" 
+         />
+        <label class="tree-toggle-label" for="the-api">The API</label>
+                        
+        <ul class="subtree">
+                
+                                <li >
+                                    <a href="https://irishgreencitrus.github.io/amanatsu/api/builtin-list/">List of Builtins</a>
+                                </li>
+
+
+
+                   
+    
+    
+    </ul>         
+    
+    </div>    
+  </nav>
+    
+
+<article>
+ 
+         
+
+  <div id="wrap">
+    
+        <h2 id="hello-world">Hello World</h2>
+<p>Almost every 'Hello World' program is very simplistic, and Amanatsu is no exception.
+However, most programming languages have a 'Hello World' that looks like this:</p>
+<pre data-lang="py" style="background-color:#fafafa;color:#383a42;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#0184bc;">print</span><span>(</span><span style="color:#50a14f;">&quot;Hello World&quot;</span><span>)</span><span>
+</span></code></pre>
+<p>Note that the <code>print</code> function takes direct arguments.
+Amanatsu does not work like this.
+It operates directly on the stack.</p>
+<blockquote>
+<p>See &quot;Concatination Explaination&quot; for
+more details on how a stack works</p>
+</blockquote>
+<p>On the roadmap, there will be an ability to assert that the stack contains certain types at the top.
+For example if your function is a mathematical function, you want to be able to check that the top of the stack contains a number.</p>
+<p>As of now, this functionality is not in the core language. However, functions still use type annotations to ease developers.
+The 'print' function/builtin ( Builtins refer to special cases in the compiler, but they have the same functionality as any function could have )
+has this type annotation.</p>
+<pre data-lang="amnt" style="background-color:#fafafa;color:#383a42;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#a626a4;">print </span><span>:: </span><span style="color:#c18401;">Any </span><span style="color:#a626a4;">-&gt; </span><span style="color:#c18401;">Void</span><span>
+</span></code></pre>
+<p>This means that the print function operates on <strong>any</strong> type on the stack, but returns <strong>nothing</strong>.
+It effectively swallows the value, while having a side effect of printing to the screen. Pretty cool.</p>
+<p>Now for that 'Hello World' function.</p>
+<pre data-lang="amnt" style="background-color:#fafafa;color:#383a42;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#50a14f;">&quot;Hello World&quot; </span><span style="color:#a626a4;">print</span><span>
+</span></code></pre>
+<p>The string literal just appends &quot;Hello World&quot; to top the stack.
+'print' takes 1 argument (as denoted by the type annotation), which in this case is &quot;Hello World&quot;, the value at the top of the stack.</p>
+<p>There is now <strong>nothing</strong> at the top of the stack. You cannot print &quot;Hello World&quot; again! That value is gone!</p>
+<p>If that confused you, just remember that in Amanatsu <strong>all functions</strong> are <strong>always</strong> destructive.
+You cannot use any value without first removing it from the stack.
+Even the <code>dup</code> function which 'duplicates' the top value on the stack, first takes the top value off the stack, and then readds it twice.
+This design decision allows all functions to have predictable behavior, a core value in Amanatsu.</p>
+
+    
+  </div>
+
+</article>
+</main>
+
+  
+
+</body>
+</html>

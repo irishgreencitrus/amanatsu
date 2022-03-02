@@ -1,0 +1,103 @@
+name = amanatsu
+file_extensions [] = amnt, amanatsu;
+contexts[] {
+   main : context {
+      : push {
+         regex \= (#)
+         styles[] = .comment;
+         context[] = comment;
+      }
+      : pattern {
+         regex \= ("(.*?)")
+         styles[] = .string;
+      }
+      : pattern {
+         regex \= (Bool|Int|Float|String|List|Char|Atom|Any|Void)
+         styles[] = .types;
+      }
+      : pattern {
+         regex \= (define|dup|float2int|for|ifelse|if|import|int2float|print|range|require_stack|return|swap|while)
+         styles[] = .builtin;
+      }
+      : pattern {
+         regex \= ([a-zA-Z_]\w*)
+         styles[] = .function;
+      }
+      : pattern {
+         regex \= (\+|-|/|\*|%|=|!=|<|>|<=|>=)
+         styles[] = .maths;
+      }
+      : pattern {
+         regex \= (\[|\])
+         styles[] = .brackets;
+      }
+      : pattern {
+         regex \= (-?\d+.\d+)
+         styles[] = .number;
+      }
+      : pattern {
+         regex \= (-?\d+)
+         styles[] = .number;
+      }
+      : pattern {
+         regex \= (:[a-zA-Z_]\w*)
+         styles[] = .ident;
+      }
+      : pattern {
+         regex \= ([^\s])
+         styles[] = .illegal;
+      }
+   }
+   comment : context {
+      : pop {
+         regex \= (#)
+         styles[] = .comment;
+      }
+      : pattern {
+         regex \= (.)
+         styles[] = .comment;
+      }
+   }
+}
+
+styles [] {
+   .function : style {
+      color = white
+
+   }
+   .builtin : style {
+      color = white
+      textmate_scope = keyword.control
+   }
+   .maths : style {
+      color = white
+      textmate_scope = keyword.operator
+   }
+   .brackets : style {
+      color = white
+   }
+   .number : style {
+      color = orange
+      textmate_scope = constant.numeric
+   }
+   .string : style {
+      color = light_green
+      textmate_scope = string
+   }
+   .comment : style {
+      color = yellow
+      textmate_scope = comment
+   }
+   .ident : style {
+      color = violet
+      textmate_scope = variable
+   }
+   .types : style {
+      color = light_blue
+      textmate_scope = constant
+   }
+   .illegal : style {
+      background_color = red
+      textmate_scope = illegal
+   }
+}

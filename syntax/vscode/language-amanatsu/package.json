@@ -1,0 +1,28 @@
+{
+    "name": "language-amanatsu",
+    "displayName": "Amanatsu Syntax Highlighting",
+    "description": "",
+    "publisher": "irishgreencitrus",
+    "repository": {"url": "https://github.com/irishgreencitrus/amanatsu"},
+    "version": "1.0.0",
+    "icon": "",
+    "engines": {
+        "vscode": "^1.64.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "amanatsu",
+            "aliases": ["Amanatsu", ""],
+            "extensions": [".amnt",".amanatsu"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "amanatsu",
+            "scopeName": "source.amanatsu",
+            "path": "./syntaxes/amanatsu.tmLanguage.xml"
+        }]
+    }
+}

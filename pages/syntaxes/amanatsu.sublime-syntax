@@ -1,0 +1,57 @@
+%YAML 1.2
+---
+name: amanatsu
+scope: source.amanatsu
+file_extensions: [ amnt, amanatsu ]
+
+contexts:
+  main:
+    - match: '(#)'
+      push: comment
+      captures:
+        0: comment.amanatsu
+    - match: '("(.*?)")'
+      captures:
+        0: string.amanatsu
+    - match: '(Bool|Int|Float|String|List|Char|Atom|Any|Void)'
+      captures:
+        0: constant.amanatsu
+    - match: '(define|dup|float2int|for|ifelse|if|import|int2float|print|range|require_stack|return|swap|while)'
+      captures:
+        0: keyword.control.amanatsu
+    - match: '([a-zA-Z_]\w*)'
+      captures:
+        0: text.amanatsu
+    - match: '(\+|-|/|\*|%|=|!=|<|>|<=|>=)'
+      captures:
+        0: keyword.operator.amanatsu
+    - match: '(\[|\])'
+      captures:
+        0: text.amanatsu
+    - match: '(-?\d+.\d+)'
+      captures:
+        0: constant.numeric.amanatsu
+    - match: '(-?\d+)'
+      captures:
+        0: constant.numeric.amanatsu
+    - match: '(:[a-zA-Z_]\w*)'
+      captures:
+        0: variable.amanatsu
+    - match: '([^\s])'
+      captures:
+        0: illegal.amanatsu
+    - match: '(.)'
+      captures:
+        0: text.amanatsu
+  comment:
+    - match: '(#)'
+      pop: true
+      captures:
+        0: comment.amanatsu
+    - match: '(.)'
+      captures:
+        0: comment.amanatsu
+    - match: '(.)'
+      captures:
+        0: text.amanatsu
+
