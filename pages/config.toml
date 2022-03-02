@@ -19,6 +19,6 @@ extra_syntaxes_and_themes = ["syntaxes"]
 
 [extra]
 # Put all your custom variables here
-logo = "/logo.svg"
+logo = "https://raw.githubusercontent.com/irishgreencitrus/amanatsu/main/pages/static/logo.svg"
 #release = "https://api.github.com/repos/irishgreencitrus/PMLO/commits/main"
 #favicon = "https://www.getzola.org/favicon.ico"
