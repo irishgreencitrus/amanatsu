@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title> Amanatsu | List of Builtins </title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+  <ul id="breadcrumbs">
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;">Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;api&#x2F;">The API</a>&nbsp;&#8594;&nbsp;</li> 
+    
+  </ul>
+  <h1>List of Builtins</h1><em>A comprehensive list of the builtins which can be used in any program.</em> 
+
+      </nav>
+
+      <main>
+      
+  <div id="taxonomies">
+       
+
+    
+    
+    
+  </div>
+
+  
+  
+    
+    
+  
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+  
+
+  
+      <ul id="toc">
+        
+          <li><a href="https://irishli.me/amanatsu/api/builtin-list/#how-to-read-the-type-charts">How to read the type charts</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/api/builtin-list/#list-of-builtins">List of builtins</a>
+          <ul>        
+            
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#define">define</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#dup">dup</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#float2int">float2int</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#for">for</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#if">if</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#ifelse">ifelse</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#print">print</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#range">range</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#swap">swap</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/api/builtin-list/#while">while</a></li>
+          
+         </ul>
+  
+        </li>
+  
+      </ul>
+  
+
+  <article>
+    <h1 id="how-to-read-the-type-charts">How to read the type charts</h1>
+<p>Type annotations are written for the ease of the programmer, not for the ease of the stack.
+They appear exactly as you would see them when you are writing code.
+In <code>define</code>s case,</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">define </span><span>:: (</span><span style="color:#e5c07b;">Atom</span><span>, </span><span style="color:#e5c07b;">Any</span><span>) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>in practice looks like</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:meaning_of_life </span><span style="color:#e5c07b;">42 </span><span style="color:#c678dd;">define</span><span>
+</span></code></pre>
+<p>even though the <code>42</code> is technically at the top of the stack.</p>
+<h1 id="list-of-builtins">List of builtins</h1>
+<h2 id="define"><code>define</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">define </span><span>:: (</span><span style="color:#e5c07b;">Atom</span><span>, </span><span style="color:#e5c07b;">Any</span><span>) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>Takes two arguments, and defines the <code>Any</code> as the name of the <code>Atom</code>.
+Can be used to define functions, as well as variables.
+Recursion is allowed.</p>
+<h2 id="dup"><code>dup</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">dup </span><span>:: </span><span style="color:#e5c07b;">Any </span><span style="color:#c678dd;">-&gt; </span><span>(</span><span style="color:#e5c07b;">Any</span><span>, </span><span style="color:#e5c07b;">Any</span><span>)</span><span>
+</span></code></pre>
+<p>Takes the first argument, and repushes it to the stack twice</p>
+<h2 id="float2int"><code>float2int</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">float2int </span><span>:: </span><span style="color:#e5c07b;">Float </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Int</span><span>
+</span></code></pre>
+<p>Takes the first argument, and rounds it down to the nearest whole number</p>
+<h2 id="for"><code>for</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">for </span><span>:: (</span><span style="color:#e5c07b;">IntList</span><span>, </span><span style="color:#e5c07b;">Atom</span><span>, TokenList) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>For every item in the <code>IntList</code>, defines it as the <code>Atom</code>, then executes the <code>TokenList</code>.</p>
+<h2 id="if"><code>if</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">if </span><span>:: (</span><span style="color:#e5c07b;">Float</span><span>, TokenList) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>If the <code>Float</code> is <code>1</code> run the <code>TokenList</code> else do nothing.</p>
+<h2 id="ifelse"><code>ifelse</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">ifelse </span><span>:: (</span><span style="color:#e5c07b;">Float</span><span>, TokenList, TokenList) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>If the <code>Float</code> is <code>1</code> run the first <code>TokenList</code> else run the second <code>TokenList</code>.</p>
+<h2 id="print"><code>print</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">print </span><span>:: </span><span style="color:#e5c07b;">Any </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>Takes one argument, and prints it to the screen.</p>
+<h2 id="range"><code>range</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">range </span><span>:: (</span><span style="color:#e5c07b;">Int</span><span>, </span><span style="color:#e5c07b;">Int</span><span>) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">IntList</span><span>
+</span></code></pre>
+<p>Generates an <code>IntList</code> with all the numbers between the first <code>Int</code> and the second <code>Int</code> (non-inclusive at the end).</p>
+<h2 id="swap"><code>swap</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">range </span><span>:: (</span><span style="color:#e5c07b;">Any</span><span>, </span><span style="color:#e5c07b;">Any</span><span>) </span><span style="color:#c678dd;">-&gt; </span><span>(</span><span style="color:#e5c07b;">Any</span><span>, </span><span style="color:#e5c07b;">Any</span><span>)</span><span>
+</span></code></pre>
+<p>This type annotation, while technically correct, does not do this function justice so have an alternative:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">range </span><span>:: (A,B) </span><span style="color:#c678dd;">-&gt; </span><span>(B,A)</span><span>
+</span></code></pre>
+<p>Swaps the two top values on the stack.</p>
+<h2 id="while"><code>while</code></h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">while </span><span>:: (TokenList, TokenList) </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>While the first <code>TokenList</code> returns 1, execute the second</p>
+
+  </article>
+
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>

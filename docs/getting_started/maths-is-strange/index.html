@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title> Amanatsu | Maths is Strange </title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+  <ul id="breadcrumbs">
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;">Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;getting_started&#x2F;">Getting Started with Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+  </ul>
+  <h1>Maths is Strange</h1><em></em> 
+
+      </nav>
+
+      <main>
+      
+  <div id="taxonomies">
+       
+
+    
+    
+    
+  </div>
+
+  
+  
+    
+    
+  
+
+  
+
+  <article>
+    <h2 id="maths-is-strange">Maths is Strange</h2>
+<p>Basic maths is suprisingly complex. It requires knowlege of the standard order of operations,
+which can be easy to forget if you are writing a program in a language like Python.
+In Amanatsu, however, a <code>+</code> is just a function in the same way as <code>print</code>.</p>
+<blockquote>
+<p>Technically, it's not a function in the same way a function you create is a function.
+It requires a special code case in the compiler because you can't really build an addition function
+from scratch in an interpreted programming language.</p>
+</blockquote>
+<p><code>+</code> being a function means that it operates <em>directly</em> on the stack.
+There is no such thing as an order of operations because it is unnecessary;
+If something looks like it is called first, it is.</p>
+<p>Example of Adding two numbers together:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e5c07b;">3 4 </span><span style="color:#c678dd;">+</span><span>
+</span><span style="color:#5c6370;"># The number at the top of the stack is, of course, 7 #</span><span>
+</span></code></pre>
+<p>Even complex expressions are ridiculously readable.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e5c07b;">7 8 </span><span style="color:#c678dd;">+ </span><span style="color:#e5c07b;">9 </span><span style="color:#c678dd;">* </span><span style="color:#e5c07b;">3 </span><span style="color:#c678dd;">-</span><span>
+</span></code></pre>
+<p>This evaluates to 7 and 8, times the result by 9, and take 3 from the result of that.
+In usual mathematics this could be written in several ways, due to order of operations.</p>
+<p>This: <code>7+8*9-3</code> is <em>not</em> the same thing, even if it looks like it.</p>
+<p>This: <code>9(7+8)-3</code> is the same thing, but arguably less readable.</p>
+<p>Neither of these are necessarily the wrong way of doing things,
+but they are certainly weird.</p>
+
+  </article>
+
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>

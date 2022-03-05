@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title> Amanatsu | Basics of Stacks </title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+  <ul id="breadcrumbs">
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;">Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;concatenation_explaination&#x2F;">Concatination Explaination</a>&nbsp;&#8594;&nbsp;</li> 
+    
+  </ul>
+  <h1>Basics of Stacks</h1><em>An explaination of the stack data structure</em> 
+
+      </nav>
+
+      <main>
+      
+  <div id="taxonomies">
+       
+
+    
+    
+    
+  </div>
+
+  
+  
+    
+    
+      
+      
+    
+      
+      
+    
+  
+
+  
+
+  <article>
+    <h2 id="basics-of-stacks">Basics of Stacks</h2>
+<p>Amanatsu is different to languages like Python, JavaScript, and C in the fact that there is one
+central data structure in which all functions push to, pull from, and manipulate in order to do
+their job. This data structure is known as a stack.</p>
+<p>The stack is fairly simple in reality.</p>
+<p>If we add something to the end stack (known as pushing),
+that will always be the thing we have to take off (known as popping).</p>
+<p>In short, the last thing you push to the stack is the first thing you can take off.
+This is called a LIFO data structure (last in first out).</p>
+<h3 id="a-simple-example-involving-just-about-nothing">A simple example involving just about nothing</h3>
+<p>Let's say we have two numbers, <code>3</code> and <code>7</code>.</p>
+<p>We want to add them to the stack.</p>
+<p>If we say the leftmost item is the top of the stack, because it's easier to read,
+and then we pushed (the order is important), <code>3</code> and then <code>7</code> to the stack, it would look like this:</p>
+<pre style="background-color:#282c34;color:#dcdfe4;"><code><span>Start of program (stack is empty):</span><span>
+</span><span>[]</span><span>
+</span><span>Push 3 to the stack:</span><span>
+</span><span>[3]</span><span>
+</span><span>Push 7 to the stack:</span><span>
+</span><span>[7, 3]</span><span>
+</span></code></pre>
+<p>We now cannot access the <code>3</code> without first popping the <code>7</code> off the stack.
+This is the basics of how a stack works.
+In Amanatsu, the stack can contain more than just numbers.
+It can contain (among numbers), lists, strings, and atomics (names for variables or functions).</p>
+<h3 id="a-simple-example-involving-amanatsu">A simple example involving Amanatsu</h3>
+<p>We have the same two numbers as above, <code>3</code> and <code>7</code>.</p>
+<p>In Amanatsu, you can just write out the numbers to add them to the stack which looks like:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e5c07b;">3 7</span><span>
+</span></code></pre>
+<p>It really couldn't be simpler.</p>
+<p>Let's say we want to print the top value off the stack.</p>
+<p>I'm going to take the same code as above and add a <code>print</code> function.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e5c07b;">3 7 </span><span style="color:#c678dd;">print</span><span>
+</span></code></pre>
+<p>If you've read this whole article you should be able to predict it outputs:</p>
+<pre style="background-color:#282c34;color:#dcdfe4;"><code><span>7</span><span>
+</span></code></pre>
+<p>to your terminal.</p>
+<p>If you don't understand why that happened, please read <a href="https://irishli.me/amanatsu/concatenation_explaination/basics-of-stacks/#a-simple-example-involving-just-about-nothing">this bit</a> more thoroughly.</p>
+
+  </article>
+
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>

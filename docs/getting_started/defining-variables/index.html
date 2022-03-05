@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title> Amanatsu | Defining Variables </title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+  <ul id="breadcrumbs">
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;">Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;getting_started&#x2F;">Getting Started with Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+  </ul>
+  <h1>Defining Variables</h1><em></em> 
+
+      </nav>
+
+      <main>
+      
+  <div id="taxonomies">
+       
+
+    
+    
+    
+  </div>
+
+  
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+
+  
+      <ul id="toc">
+        
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#variable-function">Variable == Function</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#simple-variables">Simple Variables</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#naming-requirements">Naming Requirements</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#proving-variables">Proving Variables</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#simple-functions">Simple Functions</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#proving-functions">Proving Functions</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/defining-variables/#functions-as-encapsulation">Functions as Encapsulation</a>
+          
+        </li>
+  
+      </ul>
+  
+
+  <article>
+    <h2 id="variable-function">Variable == Function</h2>
+<p>In Amanatsu, variables and functions are equivilent.</p>
+<p>A 'variable' (in other language terms) is just a function that <strong>pushes</strong> its stored value to the stack.</p>
+<p>A 'function' (in other language terms) is just a variable that <strong>executes</strong> its stored value.</p>
+<h2 id="simple-variables">Simple Variables</h2>
+<p>They are defined in the same way, as shown below:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:meaning_of_life </span><span style="color:#e5c07b;">42 </span><span style="color:#c678dd;">define</span><span>
+</span></code></pre>
+<p>The special name with a colon before it is known as an atom. It is effectively an identifier which conforms to the same naming requirements of functions (unlike strings which allow spaces).</p>
+<h2 id="naming-requirements">Naming Requirements</h2>
+<p>The naming requirements for atoms/functions/variables are:</p>
+<ul>
+<li>Cannot contain a space</li>
+<li>Can only contain the letters <code>a-z</code>, as well as uppercase <code>A-Z</code>, underscores and finally numbers.</li>
+<li>Cannot start with a number</li>
+</ul>
+<h2 id="proving-variables">Proving Variables</h2>
+<p>We can add to the code snippet above to prove that the variables work.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:meaning_of_life </span><span style="color:#e5c07b;">42 </span><span style="color:#c678dd;">define</span><span>
+</span><span>
+</span><span>meaning_of_life </span><span style="color:#c678dd;">print</span><span>
+</span></code></pre>
+<p>This prints <code>42</code> to the terminal!</p>
+<p>However, what if we want to define a function instead?</p>
+<h2 id="simple-functions">Simple Functions</h2>
+<p>We use the same <code>define</code> builtin, but we put square brackets around the value instead.</p>
+<p>We can use this to push multiple values to the stack, as well as much more powerful things shown later.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:my_favourite_numbers </span><span>[</span><span>
+</span><span>    </span><span style="color:#e5c07b;">42 7 8 5</span><span>
+</span><span>] </span><span style="color:#c678dd;">define</span><span>
+</span><span style="color:#5c6370;">#</span><span>
+</span><span style="color:#5c6370;">Don&#39;t forget square brackets! </span><span>
+</span><span style="color:#5c6370;">They are critical as they allow the several numbers to form one value on the stack</span><span>
+</span><span style="color:#5c6370;">#</span><span>
+</span></code></pre>
+<h2 id="proving-functions">Proving Functions</h2>
+<p>This pushes <strong>all</strong> the four values to the stack when you run the function as shown below:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:my_favourite_numbers </span><span>[</span><span>
+</span><span>    </span><span style="color:#e5c07b;">42 7 8 5</span><span>
+</span><span>] </span><span style="color:#c678dd;">define</span><span>
+</span><span>my_favourite_numbers </span><span style="color:#c678dd;">print</span><span>
+</span></code></pre>
+<p>This prints <code>5</code>, as the <code>print</code> function only consumes <strong>one</strong> value off the stack.</p>
+<p>We can do the print function several times to consume the rest of the values.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:my_favourite_numbers </span><span>[</span><span>
+</span><span>    </span><span style="color:#e5c07b;">42 7 8 5</span><span>
+</span><span>] </span><span style="color:#c678dd;">define</span><span>
+</span><span>my_favourite_numbers </span><span style="color:#c678dd;">print print print print </span><span>
+</span></code></pre>
+<blockquote>
+<p>Whitespace is unimportant in Amanatsu, so this is valid code</p>
+</blockquote>
+<p>This prints, in order:</p>
+<ul>
+<li>5</li>
+<li>8</li>
+<li>7</li>
+<li>42</li>
+</ul>
+<p>Although, this code looks horribly inefficient.</p>
+<p>Why don't we encapsulate the 4 print functions into one function?</p>
+<h2 id="functions-as-encapsulation">Functions as Encapsulation</h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:show4 </span><span>[</span><span>
+</span><span>    </span><span style="color:#c678dd;">print</span><span>
+</span><span>    </span><span style="color:#c678dd;">print</span><span>
+</span><span>    </span><span style="color:#c678dd;">print</span><span>
+</span><span>    </span><span style="color:#c678dd;">print</span><span>
+</span><span>] </span><span style="color:#c678dd;">define</span><span>
+</span><span style="color:#e06c75;">:my_favourite_numbers </span><span>[</span><span>
+</span><span>    </span><span style="color:#e5c07b;">42 7 8 5</span><span>
+</span><span>] </span><span style="color:#c678dd;">define</span><span>
+</span><span>my_favourite_numbers show4</span><span>
+</span></code></pre>
+<p>That looks better!</p>
+<blockquote>
+<p>If you want to improve this code even more, check the page on 'Iteration and Recursion'</p>
+</blockquote>
+<p>We can now reuse our <code>show4</code> function everytime we need to print <code>4</code> values, sweet!</p>
+
+  </article>
+
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>

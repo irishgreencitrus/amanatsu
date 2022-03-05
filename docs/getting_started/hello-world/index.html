@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title> Amanatsu | Hello World </title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+  <ul id="breadcrumbs">
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;">Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;getting_started&#x2F;">Getting Started with Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+  </ul>
+  <h1>Hello World</h1><em></em> 
+
+      </nav>
+
+      <main>
+      
+  <div id="taxonomies">
+       
+
+    
+    
+    
+  </div>
+
+  
+  
+    
+    
+  
+
+  
+
+  <article>
+    <h2 id="hello-world">Hello World</h2>
+<p>Almost every 'Hello World' program is very simplistic, and Amanatsu is no exception.
+However, most programming languages have a 'Hello World' that looks like this:</p>
+<pre data-lang="py" style="background-color:#282c34;color:#dcdfe4;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#61afef;">print</span><span>(</span><span style="color:#98c379;">&quot;Hello World&quot;</span><span>)</span><span>
+</span></code></pre>
+<p>Note that the <code>print</code> function takes direct arguments.
+Amanatsu does not work like this.
+It operates directly on the stack.</p>
+<blockquote>
+<p>See &quot;Concatination Explaination&quot; for
+more details on how a stack works</p>
+</blockquote>
+<p>On the roadmap, there will be an ability to assert that the stack contains certain types at the top.
+For example if your function is a mathematical function, you want to be able to check that the top of the stack contains a number.</p>
+<p>As of now, this functionality is not in the core language. However, functions still use type annotations to ease developers.
+The 'print' function/builtin ( Builtins refer to special cases in the compiler, but they have the same functionality as any function could have )
+has this type annotation.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">print </span><span>:: </span><span style="color:#e5c07b;">Any </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+<p>This means that the print function operates on <strong>any</strong> type on the stack, but returns <strong>nothing</strong>.
+It effectively swallows the value, while having a side effect of printing to the screen. Pretty cool.</p>
+<p>Now for that 'Hello World' function.</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#98c379;">&quot;Hello World&quot; </span><span style="color:#c678dd;">print</span><span>
+</span></code></pre>
+<p>The string literal just appends &quot;Hello World&quot; to top the stack.
+'print' takes 1 argument (as denoted by the type annotation), which in this case is &quot;Hello World&quot;, the value at the top of the stack.</p>
+<p>There is now <strong>nothing</strong> at the top of the stack. You cannot print &quot;Hello World&quot; again! That value is gone!</p>
+<p>If that confused you, just remember that in Amanatsu <strong>all functions</strong> are <strong>always</strong> destructive.
+You cannot use any value without first removing it from the stack.
+Even the <code>dup</code> function which 'duplicates' the top value on the stack, first takes the top value off the stack, and then readds it twice.
+This design decision allows all functions to have predictable behavior, a core value in Amanatsu.</p>
+
+  </article>
+
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>

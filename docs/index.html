@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title>Amanatsu</title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+        <ul id="breadcrumbs">
+          
+        </ul>
+        <h1>Amanatsu</h1>  
+          
+    <a href="javascript:void(0);" onclick="burger()" id="mobile">&#9776;</a>
+        <ul id="bger">
+        
+              
+            <li><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaElEQVRIx2NgGOqAEcZgZefQb25suIBPcW19g8Hvnz8ukmwBKzuHQHNjw3tiNFRUVDCSZAExLicX1NY3ODJ2dHT8ZxgF+OKA1kHERGsfjFowasGoBaMWEGNBbX2DI60Mr61vkBr69QEAFDIY9Yz1owAAAAAASUVORK5CYII=" width="16px" />&nbsp;<a href="https://irishli.me/amanatsu/api/">The API</a></li>
+            
+              
+            <li><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaElEQVRIx2NgGOqAEcZgZefQb25suIBPcW19g8Hvnz8ukmwBKzuHQHNjw3tiNFRUVDCSZAExLicX1NY3ODJ2dHT8ZxgF+OKA1kHERGsfjFowasGoBaMWEGNBbX2DI60Mr61vkBr69QEAFDIY9Yz1owAAAAAASUVORK5CYII=" width="16px" />&nbsp;<a href="https://irishli.me/amanatsu/concatenation_explaination/">Concatination Explaination</a></li>
+            
+              
+            <li><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAaElEQVRIx2NgGOqAEcZgZefQb25suIBPcW19g8Hvnz8ukmwBKzuHQHNjw3tiNFRUVDCSZAExLicX1NY3ODJ2dHT8ZxgF+OKA1kHERGsfjFowasGoBaMWEGNBbX2DI60Mr61vkBr69QEAFDIY9Yz1owAAAAAASUVORK5CYII=" width="16px" />&nbsp;<a href="https://irishli.me/amanatsu/getting_started/">Getting Started with Amanatsu</a></li>
+            
+            
+            <li><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5AUDFDoqfmnPqQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAC6SURBVEjH7ZTBCcIwFIa/lO6hA7iA6BCO4AZe/xHeCF49C4I7VOfQk2PUS4QibUzahiL0h0AOj7x87wtx+JhZTWQkLYFnTG1Bj5jZBVjE1LpvAknux+F1CkkvgkazB7DJ0kDSHniZ2RFY5yA4SToAKzO7d5EUoVk3V0fZWdLO11dt4gc58Ll62a1OBr2igJ8tcBuLoO0S1Wdfpt40lTALQTNlYI5ujAbTEaT8riHi2cHs4B8dpM5+coI3MpVSlNj0qyUAAAAASUVORK5CYII=" width="16px" />&nbsp;<a href="https://irishli.me/amanatsu/roadmap/">Roadmap</a></li> 
+        
+            <li><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5AUDFDoqfmnPqQAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAC6SURBVEjH7ZTBCcIwFIa/lO6hA7iA6BCO4AZe/xHeCF49C4I7VOfQk2PUS4QibUzahiL0h0AOj7x87wtx+JhZTWQkLYFnTG1Bj5jZBVjE1LpvAknux+F1CkkvgkazB7DJ0kDSHniZ2RFY5yA4SToAKzO7d5EUoVk3V0fZWdLO11dt4gc58Ll62a1OBr2igJ8tcBuLoO0S1Wdfpt40lTALQTNlYI5ujAbTEaT8riHi2cHs4B8dpM5+coI3MpVSlNj0qyUAAAAASUVORK5CYII=" width="16px" />&nbsp;<a href="https://irishli.me/amanatsu/zen-of-amanatsu/">The Zen of Amanatsu</a></li> 
+        
+        </ul>
+
+      
+      </nav>
+
+      <main>
+      
+
+        
+        
+          
+          
+            
+            
+          
+        
+
+        
+
+        <article>
+        <h1 id="amanatsu">Amanatsu<a class="anchor" href="#amanatsu">§</a>&nbsp;</h1>
+<p>The progressive, concatanative, stack-based language.
+This language is in <strong>active</strong> development and could change at any moment.
+The language is <strong>always</strong> updated before the documentation,
+and there is no guarantee anything will be static from one version to the next.
+Only after 1.0 will the language stay static.</p>
+<h2 id="using-the-documentation">Using the documentation<a class="anchor" href="#using-the-documentation">§</a>&nbsp;</h2>
+<p>Everything is available on the sidebar.
+If you've never come across a stack-based language before,
+start with 'Concatenation Explaination'. It explains some of the features of the
+language borrowed from languages like Factor and Forth.</p>
+<p>If you have come across stack-based, just not Amanatsu,
+start with 'Getting Started with Amanatsu'. This explains some of the more unique
+things in the language.</p>
+<p>If you just need to look at language specifics, such as builtins and operators and
+types, check out 'The API'.</p>
+<p>Functions/builtins are documented Haskell-like.</p>
+<p>The types they take in are on the left, and the types they return are on the right.</p>
+<p>This syntax in the language is currently non-existent and remains as a way to document
+your functions arguments and return values, however it may appear in the language later</p>
+<p>Example with the print builtin:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#c678dd;">print </span><span>:: </span><span style="color:#e5c07b;">Any </span><span style="color:#c678dd;">-&gt; </span><span style="color:#e5c07b;">Void</span><span>
+</span></code></pre>
+
+        </article>
+      
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>

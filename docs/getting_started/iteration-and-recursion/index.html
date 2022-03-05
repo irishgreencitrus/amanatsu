@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+      <title> Amanatsu | Iteration and Recursion </title>     
+      <link rel="stylesheet" href="https://irishli.me/amanatsu/main.css">
+      <script type="text/javascript" src="https://irishli.me/amanatsu/initialize-theme.js"></script>
+    </head>
+
+    <body>
+      <nav>
+        <div id="subnav">
+          <form class="theme-selector">
+            <button type="button" id="theme-light-button" class="theme-button" onclick="enableTheme('light', true)">&#9706;</button>
+            <button type="button" id="theme-dark-button"  class="theme-button enabled" onclick="enableTheme('dark', true)">&#9705;</button>
+          </form>
+          <a href="/search">&#8981;</a>       
+        </div>
+
+      
+  <ul id="breadcrumbs">
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;">Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+      
+      <li><a href="https:&#x2F;&#x2F;irishli.me&#x2F;amanatsu&#x2F;getting_started&#x2F;">Getting Started with Amanatsu</a>&nbsp;&#8594;&nbsp;</li> 
+    
+  </ul>
+  <h1>Iteration and Recursion</h1><em>How to repeat things programatically</em> 
+
+      </nav>
+
+      <main>
+      
+  <div id="taxonomies">
+       
+
+    
+    
+    
+  </div>
+
+  
+  
+    
+    
+  
+    
+    
+      
+      
+    
+      
+      
+    
+  
+    
+    
+  
+
+  
+      <ul id="toc">
+        
+          <li><a href="https://irishli.me/amanatsu/getting_started/iteration-and-recursion/#repetition">Repetition</a>
+          
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/iteration-and-recursion/#iteration">Iteration</a>
+          <ul>        
+            
+            <li><a href="https://irishli.me/amanatsu/getting_started/iteration-and-recursion/#usage-of-the-while-loop">Usage of the while loop</a></li>
+          
+            <li><a href="https://irishli.me/amanatsu/getting_started/iteration-and-recursion/#usage-of-the-for-loop">Usage of the for loop</a></li>
+          
+         </ul>
+  
+        </li>
+  
+          <li><a href="https://irishli.me/amanatsu/getting_started/iteration-and-recursion/#recursion">Recursion</a>
+          
+        </li>
+  
+      </ul>
+  
+
+  <article>
+    <h1 id="repetition">Repetition</h1>
+<p>Programming languages are practically useless without some form of repetition.
+It is required to have it in some form to even be <em>considered</em> a programming language.</p>
+<p>Of repetition, Amanatsu (and most programming languages) has two forms:</p>
+<ul>
+<li>Iteration</li>
+<li>Recursion</li>
+</ul>
+<h1 id="iteration">Iteration</h1>
+<p>Perhaps the simplest form is iteration.</p>
+<p>Iteration in Amanatsu comes in two forms:</p>
+<ul>
+<li>A <code>while</code> loop</li>
+<li>A <code>for</code> loop</li>
+</ul>
+<h2 id="usage-of-the-while-loop">Usage of the while loop</h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span>[</span><span style="color:#e5c07b;">1</span><span>] [</span><span>
+</span><span>	</span><span style="color:#98c379;">&quot;This will print forever&quot; </span><span style="color:#c678dd;">print	</span><span>
+</span><span>] </span><span style="color:#c678dd;">while</span><span>
+</span></code></pre>
+<p>This is how this works:</p>
+<ul>
+<li>Execute first <code>TokenList</code></li>
+<li>After executing the first <code>TokenList</code>:
+<ul>
+<li>If the top value on the stack is <code>1</code>:
+<ul>
+<li>Execute the second <code>TokenList</code> and jump back to step 1</li>
+</ul>
+</li>
+<li>If the top value on the stack is <strong>not</strong> <code>1</code>
+<ul>
+<li>Skip past the second <code>TokenList</code> and continue for the rest of the program</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="usage-of-the-for-loop">Usage of the for loop</h2>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e5c07b;">1 10 </span><span style="color:#c678dd;">range </span><span style="color:#e06c75;">:i </span><span>[</span><span>
+</span><span>	i </span><span style="color:#c678dd;">print</span><span>
+</span><span>] </span><span style="color:#c678dd;">for</span><span>
+</span></code></pre>
+<p><code>1 10 range</code> resolves to a <code>IntList</code> which can be iterated over by the for loop.</p>
+<ul>
+<li>For every item in the <code>IntList</code>:
+<ul>
+<li>Assign that item to <code>:i</code> (like how <code>define</code> works)</li>
+<li>Execute the <code>TokenList</code></li>
+</ul>
+</li>
+</ul>
+<p>Soon there will be a way to not assign anything at a for loop by using <code>:_</code> as the variable and that will just discard the value.</p>
+<h1 id="recursion">Recursion</h1>
+<p>Recursion in its simplest form is when a function calls itself.</p>
+<p>This method of repetition is not recommended for most cases as there is no optimisation.
+Optimisation is on the roadmap so this may be implemented in the future.</p>
+<p>Due to the fact that tokens are not executed until they absolutely need to be, recursion is possible:</p>
+<pre data-lang="amnt" style="background-color:#282c34;color:#dcdfe4;" class="language-amnt "><code class="language-amnt" data-lang="amnt"><span style="color:#e06c75;">:hello_forever </span><span>[</span><span>
+</span><span>	</span><span style="color:#98c379;">&quot;HELLO WORLD&quot; </span><span style="color:#c678dd;">print </span><span>
+</span><span>	hello_forever</span><span>
+</span><span>] </span><span style="color:#c678dd;">define</span><span>
+</span><span>hello_forever</span><span>
+</span></code></pre>
+<p>After the first function call, this function will never return and should print &quot;HELLO WORLD&quot; forever.</p>
+<p>At the moment, it doesn't.</p>
+<p>The function call stack overflows due to lack of optimisation.
+For this reason you should use iteration at all times for the minute but know that recursion is supported.</p>
+
+  </article>
+
+      </main>
+
+      <script type="text/javascript" src="https://irishli.me/amanatsu/update-theme-elements.js"></script>
+
+      <script>
+        function burger() {
+          var x = document.getElementById("bger");
+          if (x.style.display === "block") {
+            x.style.display = "none";
+          } else {
+            x.style.display = "block";
+          }
+        }
+        </script>
+    </body>
+</html>
