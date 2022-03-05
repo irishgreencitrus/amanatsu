@@ -11,6 +11,20 @@
 ![Vim Syntax](https://img.shields.io/badge/vim-supported-brightgreen)
 
 The progressive, concatenative, stack-based programming language to rival verbosity and complexity.
+## Installation
+Install [Zig](https://ziglang.org) in whichever way you normally do.
+
+```
+git clone https://github.com/irishgreencitrus/amanatsu
+cd amanatsu
+zig build
+```
+
+The binary will then be in `zig-out/bin/`.
+### Running a program
+```
+amanatsu name-of-program.amnt
+```
 ## Built with clarity in mind
 ### No hidden control flow
 If something doesn't look like it calls a function, it doesn't.
