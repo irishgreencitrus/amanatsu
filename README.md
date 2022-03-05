@@ -1,4 +1,4 @@
-# Amanatsu
+![Amanatsu](icons/Name%20Logo.png)
 [![Documentation](https://img.shields.io/badge/documentation-available-blue)](https://irishli.me/amanatsu)
 
 [![GitHub issues](https://img.shields.io/github/issues/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/issues) [![GitHub forks](https://img.shields.io/github/forks/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/network) [![GitHub stars](https://img.shields.io/github/stars/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/stargazers) [![GitHub license](https://img.shields.io/github/license/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/blob/main/LICENSE) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/irishgreencitrus/amanatsu?color=orange&label=commits) 
