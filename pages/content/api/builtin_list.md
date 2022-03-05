@@ -1,9 +1,10 @@
 +++
 title = "List of Builtins"
+description = "A comprehensive list of the builtins which can be used in any program."
 weight = 1
 sort_by = "weight"
 +++
-## How to read the type charts
+# How to read the type charts
 Type annotations are written for the ease of the programmer, not for the ease of the stack.
 They appear exactly as you would see them when you are writing code.
 In `define`s case,
@@ -16,6 +17,7 @@ in practice looks like
 ```
 even though the `42` is technically at the top of the stack.
 
+# List of builtins
 ## `define`
 ```amnt
 define :: (Atom, Any) -> Void
@@ -67,3 +69,8 @@ This type annotation, while technically correct, does not do this function justi
 range :: (A,B) -> (B,A)
 ```
 Swaps the two top values on the stack.
+## `while`
+```amnt
+while :: (TokenList, TokenList) -> Void
+```
+While the first `TokenList` returns 1, execute the second

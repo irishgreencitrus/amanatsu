@@ -1,0 +1,85 @@
+'fileTypes' : [
+  'amnt'
+  'amanatsu'
+]
+'name' : 'amanatsu'
+'patterns' : [
+  {
+    'include' : '#main'
+  }
+]
+'scopeName' : 'source.amanatsu'
+'uuid' : ''
+'repository' : {
+  'main' : {
+    'patterns' : [
+      {
+        'begin' : '(#)'
+        'beginCaptures' : {
+          '1' : {
+            'name' : 'comment.amanatsu'
+          }
+        }
+        'patterns' : [
+          {
+            'include' : '#comment'
+          }
+        ]
+        'end' : '(#)'
+        'endCaptures' : {
+          '1' : {
+            'name' : 'comment.amanatsu'
+          }
+        }
+      }
+      {
+        'match' : '("(.*?)")'
+        'name' : 'string.amanatsu'
+      }
+      {
+        'match' : '(Bool|Int|Float|String|List|Char|Atom|Any|Void)'
+        'name' : 'constant.amanatsu'
+      }
+      {
+        'match' : '(define|dup|float2int|for|ifelse|if|import|int2float|print|range|require_stack|return|swap|while)'
+        'name' : 'keyword.control.amanatsu'
+      }
+      {
+        'match' : '([a-zA-Z_]\\w*)'
+        'name' : 'text.amanatsu'
+      }
+      {
+        'match' : '(\\+|-|/|\\*|%|=|!=|<|>|<=|>=)'
+        'name' : 'keyword.operator.amanatsu'
+      }
+      {
+        'match' : '(\\[|\\])'
+        'name' : 'text.amanatsu'
+      }
+      {
+        'match' : '(-?\\d+.\\d+)'
+        'name' : 'constant.numeric.amanatsu'
+      }
+      {
+        'match' : '(-?\\d+)'
+        'name' : 'constant.numeric.amanatsu'
+      }
+      {
+        'match' : '(:[a-zA-Z_]\\w*)'
+        'name' : 'variable.amanatsu'
+      }
+      {
+        'match' : '([^\\s])'
+        'name' : 'illegal.amanatsu'
+      }
+    ]
+  }
+  'comment' : {
+    'patterns' : [
+      {
+        'match' : '(.)'
+        'name' : 'comment.amanatsu'
+      }
+    ]
+  }
+}

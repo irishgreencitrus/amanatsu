@@ -1,5 +1,6 @@
 +++
 title = "Basics of Stacks"
+description = "An explaination of the stack data structure"
 weight = 1
 +++
 ## Basics of Stacks

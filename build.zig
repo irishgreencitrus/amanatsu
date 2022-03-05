@@ -9,8 +9,6 @@ pub fn build(b: *Builder) void {
 
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
-    const mode = b.standardReleaseOptions();
-
     const exe = b.addExecutable("amanatsu", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);

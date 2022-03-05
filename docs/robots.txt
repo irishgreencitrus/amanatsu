@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://irishgreencitrus.github.io/amanatsu/sitemap.xml

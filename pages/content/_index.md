@@ -1,15 +1,16 @@
 +++
-title = "index"
+title = "Amanatsu"
+sort_by = "weight"
 insert_anchor_links = "right"
 +++
-## Amanatsu
+# Amanatsu
 The progressive, concatanative, stack-based language.
 This language is in **active** development and could change at any moment.
 The language is **always** updated before the documentation,
 and there is no guarantee anything will be static from one version to the next.
 Only after 1.0 will the language stay static.
 
-### Using the documentation
+## Using the documentation
 Everything is available on the sidebar.
 If you've never come across a stack-based language before,
 start with 'Concatenation Explaination'. It explains some of the features of the
