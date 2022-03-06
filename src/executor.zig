@@ -2,7 +2,7 @@ const std = @import("std");
 const errors = @import("errors.zig");
 const fmt = std.fmt;
 const print = std.debug.print;
-const lexer = @import("lexer.zig");
+const parser = @import("parser.zig");
 
 const StackType = enum {
     String,
@@ -14,7 +14,7 @@ const StackType = enum {
 const StackItem = struct { item_type: StackType, data: union {
     text: []const u8,
     float: f64,
-    token_list: []lexer.Token,
+    token_list: []parser.Token,
     float_list: []f64,
 } };
 
@@ -22,6 +22,8 @@ const Stack = struct {
     list: std.ArrayList(StackItem) = undefined,
     variables: std.StringHashMap(StackItem) = undefined,
     stack_allocator: std.mem.Allocator = undefined,
+    bracket_depth: u64 = 0,
+    scope_depth: u64   = 0,
     fn init(self: *Stack, alloc: std.mem.Allocator) !void {
         self.stack_allocator = alloc;
         self.list = try std.ArrayList(StackItem).initCapacity(alloc, 1024);
@@ -34,13 +36,6 @@ const Stack = struct {
             return false;
         }
     }
-    // fn stack_item_is(self: *Stack, nth: u64, required_type: StackType) bool {
-    //     if (self.list[self.list.len - 1 - nth].item_type == required_type) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
     fn create_float(_: *Stack, value: f64) StackItem {
         return StackItem{ .item_type = .Float, .data = .{ .float = value } };
     }
@@ -56,13 +51,29 @@ const Stack = struct {
         if (!self.item_is(key, .Atom)) {
             errors.executor_panic("'define' expected type Atom as key, got type ",key.item_type);
         }
-        try self.variables.put(key.data.text, value);
+        try self.variables.put(try self.stack_allocator.dupe(u8,key.data.text), value);
+        //std.debug.print("{s} :: {any}\n",.{key.data.text,value});
+    }
+    fn builtin_local_define(self: *Stack) !void {
+        if (self.scope_depth == 0) {
+            errors.panic("'local' only valid inside functions.");
+        }
+        const value = self.list.pop();
+        const key = self.list.pop();
+        if (!self.item_is(key, .Atom)) {
+            errors.executor_panic("'local' expected type Atom as key, got type ",key.item_type);
+        }
+        var key_string = std.ArrayList(u8).init(self.stack_allocator);
+        defer key_string.deinit();
+        var scope_as_str = try std.fmt.allocPrint(self.stack_allocator,"{}",.{self.scope_depth});
+        try key_string.appendSlice(scope_as_str);
+        try key_string.appendSlice(key.data.text);
+        try self.variables.put(key_string.toOwnedSlice(), value);
+        //std.debug.print("{s} :: {any}\n",.{key.data.text,value});
     }
     fn builtin_if(
         self: *Stack,
-        raw_data: []const u8,
-        bracket_depth: *u64,
-        current_token_list: *std.ArrayList(lexer.Token),
+        current_token_list: *std.ArrayList(parser.Token),
     ) anyerror!void {
         const clause = self.list.pop();
         const condition = self.list.pop();
@@ -74,15 +85,13 @@ const Stack = struct {
         }
         if (condition.data.float == 1) {
             for (clause.data.token_list) |tok| {
-                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                try execute_single_token(tok, current_token_list, self );
             }
         }
     }
     fn builtin_ifelse(
         self: *Stack,
-        raw_data: []const u8,
-        bracket_depth: *u64,
-        current_token_list: *std.ArrayList(lexer.Token),
+        current_token_list: *std.ArrayList(parser.Token),
     ) anyerror!void {
         const elseclause = self.list.pop();
         const ifclause = self.list.pop();
@@ -98,19 +107,17 @@ const Stack = struct {
         }
         if (condition.data.float == 1) {
             for (ifclause.data.token_list) |tok| {
-                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                try execute_single_token(tok, current_token_list, self);
             }
         } else {
             for (elseclause.data.token_list) |tok| {
-                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                try execute_single_token(tok, current_token_list, self);
             }
         }
     }
     fn builtin_while(
         self: *Stack,
-        raw_data: []const u8,
-        bracket_depth: *u64,
-        current_token_list: *std.ArrayList(lexer.Token),
+        current_token_list: *std.ArrayList(parser.Token),
     ) anyerror!void {
         const clause = self.list.pop();
         const condition = self.list.pop();
@@ -122,13 +129,13 @@ const Stack = struct {
         }
         while (true) {
             for (condition.data.token_list) |tok| {
-                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                try execute_single_token(tok, current_token_list, self);
             }
             if (self.list.pop().data.float == 0) {
                 break;
             }
             for (clause.data.token_list) |tok| {
-                try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                try execute_single_token(tok, current_token_list, self);
             }
         }
     }
@@ -150,9 +157,7 @@ const Stack = struct {
     }
     fn builtin_for(
         self: *Stack,
-        raw_data: []const u8,
-        bracket_depth: *u64,
-        current_token_list: *std.ArrayList(lexer.Token),
+        current_token_list: *std.ArrayList(parser.Token),
     ) anyerror!void {
         const clause = self.list.pop();
         const var_name = self.list.pop();
@@ -171,7 +176,7 @@ const Stack = struct {
                 for (list.data.float_list) |fl| {
                     try self.variables.put(var_name.data.text, self.create_float(fl));
                     for (clause.data.token_list) |tok| {
-                        try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                        try execute_single_token(tok, current_token_list, self);
                     }
                 }
             },
@@ -208,31 +213,43 @@ const Stack = struct {
     }
     fn execute_function(
         self: *Stack,
-        raw_data: []const u8,
         name: []const u8,
-        bracket_depth: *u64,
-        current_token_list: *std.ArrayList(lexer.Token),
+        current_token_list: *std.ArrayList(parser.Token),
     ) anyerror!void {
-        var possible_func = self.variables.get(name);
-        
+        var possible_func : ?StackItem = undefined;
+        possible_func = self.variables.get(name);
+        if (possible_func) |_| {} else {
+            if (self.scope_depth != 0) {
+                var key_string = std.ArrayList(u8).init(self.stack_allocator);
+                defer key_string.deinit();
+                var scope_as_str = try std.fmt.allocPrint(self.stack_allocator,"{}",.{self.scope_depth});
+                try key_string.appendSlice(scope_as_str);
+                try key_string.appendSlice(name);
+                const new_name = key_string.toOwnedSlice();
+                //print("Can find? {s}\n",.{key_string.items});
+                possible_func = self.variables.get(new_name);
+            }
+            if (possible_func) |_| {} else errors.executor_panic("Unknown function ",name);
+        }
+        //print("FUNCITON WITH NAME {s}\n",.{name});
         if (possible_func) |function_contents| {
             switch (function_contents.item_type) {
                 .TokenList => {
                     for (function_contents.data.token_list) |tok| {
-                        if (tok.id == .BuiltinReturn) {
-                            bracket_depth.* = 0;
-                            return;
-                        }
-                        try execute_single_token(tok, raw_data, bracket_depth, current_token_list, self);
+                        self.scope_depth += 1;
+                        // if (tok.id == .BuiltinReturn) {
+                        //     bracket_depth = 0;
+                        //     return;
+                        // }
+                        try execute_single_token(tok, current_token_list, self);
+                        self.scope_depth -= 1;
                     }
                 },
                 else => {
                     try self.append(function_contents);
                 },
             }
-        } else {
-            errors.executor_panic("Unknown function ",name);
-        }
+        } else unreachable;
     }
     fn builtin_float2int(self: *Stack) !void {
         const value = self.list.pop();
@@ -334,40 +351,40 @@ const Stack = struct {
         try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float >= a.data.float))));
     }
 };
+// Bracket Depth tells us if we're inside a quote
+// Scope Depth tells us if we're executing a quote
 fn execute_single_token(
-    t: lexer.Token,
-    raw_data: []const u8,
-    bracket_depth: *u64,
-    current_token_list: *std.ArrayList(lexer.Token),
+    t: parser.Token,
+    current_token_list: *std.ArrayList(parser.Token),
     stack: *Stack,
 ) !void {
     //print("DEBUG :: EXECUTE SINGLE TOKEN CALLED WITH {any} {any} {any} {any} {any}\n",.{t , raw_data, bracket_depth.*, current_token_list.*, stack.*});
-    if (bracket_depth.* == 0) {
+    //std.debug.print("SCOPE, BRACKET DEPTH :: {}, {}, {}\n",.{stack.*.scope_depth,stack.*.bracket_depth , t.id});
+    if (stack.*.bracket_depth == 0) {
         switch (t.id) {
-            .Eof, .Comment => {},
+            .Eof     => { return; },
+            .Comment => { @panic("Comment was not parsed properly"); },
             .BracketLeft => {
-                bracket_depth.* += 1;
+                stack.*.bracket_depth += 1;
             },
             .BracketRight => {
-                unreachable;
+                errors.panic("Brackets are not balanced. A left bracket must always precede a right one.");
             },
             .Float => {
-                try stack.*.append(stack.*.create_float(try fmt.parseFloat(f64, raw_data[t.start..t.end])));
+                try stack.*.append(stack.*.create_float(t.data.num));
             },
             .BuiltinFloatToInt => {
                 try stack.*.builtin_float2int();
             },
             .String => {
-                try stack.*.append(stack.*.create_string(raw_data[t.start + 1 .. t.end - 1]));
+                try stack.*.append(stack.*.create_string(t.data.str));
             },
             .Atom => {
-                try stack.*.append(stack.*.create_atom(raw_data[t.start + 1 .. t.end]));
+                try stack.*.append(stack.*.create_atom(t.data.str));
             },
             .Function => {
                 try stack.*.execute_function(
-                    raw_data,
-                    raw_data[t.start..t.end],
-                    bracket_depth,
+                    t.data.str,
                     current_token_list,
                 );
             },
@@ -379,33 +396,28 @@ fn execute_single_token(
             },
             .BuiltinIf => {
                 try stack.*.builtin_if(
-                    raw_data,
-                    bracket_depth,
                     current_token_list,
                 );
             },
             .BuiltinIfElse => {
                 try stack.*.builtin_ifelse(
-                    raw_data,
-                    bracket_depth,
                     current_token_list,
                 );
             },
             .BuiltinDefine => {
                 try stack.*.builtin_define();
             },
+            .BuiltinLocalDefine => {
+                try stack.*.builtin_local_define();
+            },
             .BuiltinRequireStack => {},
             .BuiltinFor => {
                 try stack.*.builtin_for(
-                    raw_data,
-                    bracket_depth,
                     current_token_list,
                 );
             },
             .BuiltinWhile => {
                 try stack.*.builtin_while(
-                    raw_data,
-                    bracket_depth,
                     current_token_list,
                 );
             },
@@ -453,12 +465,12 @@ fn execute_single_token(
     } else {
         switch (t.id) {
             .BracketLeft => {
-                bracket_depth.* += 1;
+                stack.*.bracket_depth += 1;
                 try current_token_list.*.append(t);
             },
             .BracketRight => {
-                bracket_depth.* -= 1;
-                if (bracket_depth.* == 0) {
+                stack.*.bracket_depth -= 1;
+                if (stack.*.bracket_depth == 0) {
                     try stack.*.append(StackItem{
                         .item_type = .TokenList,
                         .data = .{
@@ -476,12 +488,11 @@ fn execute_single_token(
     }
 }
 
-pub fn execute(alloc: std.mem.Allocator, tokens: []const lexer.Token, raw_data: []const u8) anyerror!void {
+pub fn execute(alloc: std.mem.Allocator, tokens: []const parser.Token) anyerror!void {
     var stack = Stack{};
     try stack.init(alloc);
-    var bracket_depth: u64 = 0;
-    var current_token_list = std.ArrayList(lexer.Token).init(alloc);
+    var current_token_list = std.ArrayList(parser.Token).init(alloc);
     for (tokens) |t| {
-        try execute_single_token(t, raw_data, &bracket_depth, &current_token_list, &stack);
+        try execute_single_token(t, &current_token_list, &stack);
     }
 }

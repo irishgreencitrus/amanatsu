@@ -17,7 +17,11 @@
             "id": "amanatsu",
             "aliases": ["Amanatsu", ""],
             "extensions": [".amnt",".amanatsu"],
-            "configuration": "./language-configuration.json"
+            "configuration": "./language-configuration.json",
+            "icon": {
+                "dark": "./icon.png",
+                "light": "./icon.png"
+            }
         }],
         "grammars": [{
             "language": "amanatsu",

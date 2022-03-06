@@ -52,6 +52,7 @@ pub const Token = struct {
         BracketLeft,
         BracketRight,
         BuiltinDefine,
+        BuiltinLocalDefine,
         BuiltinDup,
         BuiltinFloatToInt,
         BuiltinFor,
@@ -71,6 +72,7 @@ pub const Token = struct {
         Eof,
         Float,
         Function,
+        PreProcUse,
         OperatorDivide,
         OperatorEqual,
         OperatorGreaterThan,
@@ -100,7 +102,8 @@ pub const Token = struct {
         .{ "List", .TypeList },
         .{ "String", .TypeString },
 
-        .{ "define", .BuiltinDefine },
+        .{ "local", .BuiltinLocalDefine},
+        .{ "global", .BuiltinDefine },
         .{ "dup", .BuiltinDup },
         .{ "float2int", .BuiltinFloatToInt },
         .{ "for", .BuiltinFor },
@@ -114,6 +117,9 @@ pub const Token = struct {
         .{ "return", .BuiltinReturn },
         .{ "swap", .BuiltinSwap },
         .{ "while", .BuiltinWhile },
+    });
+    pub const directives = std.ComptimeStringMap(Id, .{
+        .{ "@use", .PreProcUse},
     });
 };
 pub const Tokenizer = struct {
@@ -135,6 +141,8 @@ pub const Tokenizer = struct {
             String,
             Colon,
             ColonedIdentifier,
+            At,
+            AtIdentifier,
             Minus,
             Identifier,
             Comment,
@@ -194,6 +202,9 @@ pub const Tokenizer = struct {
                         res = .OperatorEqual;
                         break;
                     },
+                    '@' => {
+                        state = .At;
+                    },
                     '<' => {
                         state = .LessThan;
                     },
@@ -243,6 +254,21 @@ pub const Tokenizer = struct {
                     if (!isIdentifier(c)) {
                         self.it.i -= unicode.utf8CodepointSequenceLength(c) catch unreachable;
                         res = .Atom;
+                        break;
+                    }
+                },
+                .At => {
+                    if (isWhitespace(c)) {
+                        return self.reportError("At requires preprocessor statement following it.", c);
+                    } else if (isIdentifier(c)) {
+                        state = .AtIdentifier;
+                    }
+                },
+                .AtIdentifier => {
+                    if (!isIdentifier(c)) {
+                        self.it.i -= unicode.utf8CodepointSequenceLength(c) catch unreachable;
+                        const slice = self.it.bytes[start_index..self.it.i];
+                        res = Token.directives.get(slice) orelse unreachable;
                         break;
                     }
                 },
