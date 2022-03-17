@@ -4,6 +4,9 @@ const cmdline = @import("cmdline.zig");
 const executor = @import("executor.zig");
 const parser = @import("parser.zig");
 const std = @import("std");
+
+pub const log_level: std.log.Level = .err;
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();

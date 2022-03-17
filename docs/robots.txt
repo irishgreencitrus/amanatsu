@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://irishli.me/amanatsu/sitemap.xml
+Sitemap: https://irishgreencitrus.github.io/amanatsu/sitemap.xml

@@ -7,7 +7,7 @@ if exists("b:current_syntax")
 endif
 
 syn region amanatsuComment start="#" end="#"
-syn keyword amanatsuBuiltin define dup float2int for ifelse if import int2float print range require_stack return swap while
+syn keyword amanatsuBuiltin global local dup float2int for ifelse if import int2float print range require_stack return swap while
 syn keyword amanatsuType Bool Int Float String List Char Atom Any
 syn region amanatsuString start=/\v"/ end=/\v"/
 syn match amanatsuAtomic ":[a-zA-Z_]\w*"
