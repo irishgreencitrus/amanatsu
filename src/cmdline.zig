@@ -5,11 +5,11 @@ pub const CommandFlags = struct {
 };
 
 pub fn process(alloc: std.mem.Allocator) !CommandFlags {
-    var args_iter = std.process.args();
+    var args_iter = try std.process.argsWithAllocator(alloc);
     _ = args_iter.skip(); // SKIP PROGRAM NAME
-    var program = args_iter.next(alloc);
+    var program = args_iter.next();
     if (program) |p| {
-        return CommandFlags{.filename = try p};
+        return CommandFlags{.filename = p};
     } else {
         abort.panic("Add a program to run.");
     }

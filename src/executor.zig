@@ -84,7 +84,8 @@ const Stack = struct {
         if (key.data.text[0] == 0) {
             var iter = self.variables.keyIterator();
             while (iter.next()) |item| {
-                dprint("KEY :: {s}", .{item.*});
+                dprint("KEY :: {any}", .{item.*});
+                dprint("VALUE :: {any}", .{self.variables.get(item.*)});
             }
             @panic("NULL BYTE DETECTED IN LOCALDEFINE. THIS IS A BUG IN THE INTERPRETER.");
         }
@@ -242,7 +243,7 @@ const Stack = struct {
     ) anyerror!void {
         var possible_func: ?StackItem = undefined;
         possible_func = self.variables.get(name);
-        dprint("Can find? {s}", .{name});
+        dprint("Can find? {any}", .{name});
         if (possible_func) |data| {
             dprint("FOUND AS {any}", .{data});
         } else {
@@ -255,7 +256,7 @@ const Stack = struct {
                 var scope_as_str = try std.fmt.allocPrint(self.stack_allocator, "{}", .{self.scope_depth});
                 try key_string.appendSlice(scope_as_str);
                 try key_string.appendSlice(name);
-                dprint("Can find LOCAL? {s}", .{key_string.items});
+                dprint("Can find LOCAL? {any}", .{key_string.items});
                 const new_name = key_string.toOwnedSlice();
                 possible_func = self.variables.get(new_name);
             }
@@ -405,15 +406,18 @@ fn execute_single_token(
                 errors.panic("Brackets are not balanced. A left bracket must always precede a right one.");
             },
             .Float => {
+                dprint("FLOAT APPEND :: {}",.{t.data.num});
                 try stack.*.append(stack.*.create_float(t.data.num));
             },
             .BuiltinFloatToInt => {
                 try stack.*.builtin_float2int();
             },
             .String => {
+                dprint("STRING APPEND :: {any}",.{t.data.str});
                 try stack.*.append(stack.*.create_string(t.data.str));
             },
             .Atom => {
+                dprint("ATOM APPEND :: {any}",.{t.data.str});
                 try stack.*.append(stack.*.create_atom(t.data.str));
             },
             .Function => {
