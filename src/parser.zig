@@ -1,9 +1,11 @@
 const std = @import("std");
 const lexer = @import("lexer.zig");
+const data_types = @import("data_types.zig");
+const UsedNumberType = data_types.UsedNumberType;
 
 pub const Token = struct { id: lexer.Token.Id, start: u32, data: union {
-    str: []const u8,
-    num: f64,
+    text: []const u8,
+    number: UsedNumberType,
     single_token: u0,
 } };
 
@@ -24,7 +26,7 @@ pub fn parseTokens(
                     try new_token_list.append(Token{
                         .id = tok.id,
                         .start = tok.start,
-                        .data = .{ .str = raw_data[tok.start + 1 .. tok.end - 1] },
+                        .data = .{ .text = raw_data[tok.start + 1 .. tok.end - 1] },
                     });
                 }
             },
@@ -33,22 +35,22 @@ pub fn parseTokens(
                     try new_token_list.append(Token{
                         .id = tok.id,
                         .start = tok.start,
-                        .data = .{ .str = raw_data[tok.start + 1 .. tok.end] },
+                        .data = .{ .text = raw_data[tok.start + 1 .. tok.end] },
                     });
                 }
             },
-            .Float => {
+            .Number => {
                 try new_token_list.append(Token{
                     .id = tok.id,
                     .start = tok.start,
-                    .data = .{ .num = std.fmt.parseFloat(f64,raw_data[tok.start..tok.end]) catch unreachable },
+                    .data = .{ .number = std.fmt.parseFloat(UsedNumberType, raw_data[tok.start..tok.end]) catch unreachable },
                 });
             },
             .Function => {
                 try new_token_list.append(Token{
                     .id = tok.id,
                     .start = tok.start,
-                    .data = .{ .str = raw_data[tok.start..tok.end] },
+                    .data = .{ .text = raw_data[tok.start..tok.end] },
                 });
             },
             else => {

@@ -5,7 +5,7 @@ const math = std.math;
 const testing = std.testing;
 const unicode = std.unicode;
 const LexerErrors = error{TokenizerError};
-fn isIdentifier(c: u32) bool {
+pub fn isIdentifier(c: u32) bool {
     return switch (c) {
         'a'...'z',
         'A'...'Z',
@@ -54,23 +54,19 @@ pub const Token = struct {
         BuiltinDefine,
         BuiltinLocalDefine,
         BuiltinDup,
-        BuiltinFloatToInt,
+        BuiltinAsType,
         BuiltinFor,
         BuiltinRange,
         BuiltinIf,
-        BuiltinImport,
         BuiltinIfElse,
-        BuiltinIntToFloat,
         BuiltinPrint,
         BuiltinReturn,
         BuiltinRequireStack,
-        BuiltinStrToFloat,
-        BuiltinStrToInt,
         BuiltinSwap,
         BuiltinWhile,
         Comment,
         Eof,
-        Float,
+        Number,
         Function,
         PreProcUse,
         OperatorDivide,
@@ -85,32 +81,15 @@ pub const Token = struct {
         OperatorNotEqual,
         OperatorPlus,
         String,
-        TypeAtom,
-        TypeBool,
-        TypeChar,
-        TypeFloat,
-        TypeInt,
-        TypeList,
-        TypeString,
     };
     pub const keywords = std.ComptimeStringMap(Id, .{
-        .{ "Atom", .TypeAtom },
-        .{ "Bool", .TypeBool },
-        .{ "Char", .TypeChar },
-        .{ "Float", .TypeFloat },
-        .{ "Int", .TypeInt },
-        .{ "List", .TypeList },
-        .{ "String", .TypeString },
-
         .{ "local", .BuiltinLocalDefine},
         .{ "global", .BuiltinDefine },
         .{ "dup", .BuiltinDup },
-        .{ "float2int", .BuiltinFloatToInt },
         .{ "for", .BuiltinFor },
         .{ "if", .BuiltinIf },
         .{ "ifelse", .BuiltinIfElse },
-        .{ "import", .BuiltinImport },
-        .{ "int2float", .BuiltinIntToFloat },
+        .{ "astype", .BuiltinAsType },
         .{ "print", .BuiltinPrint },
         .{ "range", .BuiltinRange },
         .{ "require_stack", .BuiltinRequireStack },
@@ -299,7 +278,7 @@ pub const Tokenizer = struct {
                     },
                     else => {
                         self.it.i -= unicode.utf8CodepointSequenceLength(c) catch unreachable;
-                        res = .Float;
+                        res = .Number;
                         break;
                     },
                 },
@@ -315,7 +294,7 @@ pub const Tokenizer = struct {
                     '0'...'9', '_' => {},
                     else => {
                         self.it.i -= unicode.utf8CodepointSequenceLength(c) catch unreachable;
-                        res = .Float;
+                        res = .Number;
                         break;
                     },
                 },

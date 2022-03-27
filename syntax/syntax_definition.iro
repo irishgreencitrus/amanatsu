@@ -12,11 +12,11 @@ contexts[] {
          styles[] = .string;
       }
       : pattern {
-         regex \= (Bool|Int|Float|String|List|Char|Atom|Any|Void)
-         styles[] = .types;
+         regex \= (@[a-z_]+)
+         styles[] = .preproc;
       }
       : pattern {
-         regex \= (define|dup|float2int|for|ifelse|if|import|int2float|print|range|require_stack|return|swap|while)
+         regex \= (astype|local|global|dup|for|ifelse|if|import|print|range|require_stack|return|swap|while)
          styles[] = .builtin;
       }
       : pattern {
@@ -40,8 +40,12 @@ contexts[] {
          styles[] = .number;
       }
       : pattern {
+         regex \= (:NumberList|:TokenList|:Number|:String|:Atom)
+         styles[] = .types;
+      }
+      : pattern {
          regex \= (:[a-zA-Z_]\w*)
-         styles[] = .ident;
+         styles[] = .atom;
       }
       : pattern {
          regex \= ([^\s])
@@ -63,11 +67,14 @@ contexts[] {
 styles [] {
    .function : style {
       color = white
-
    }
    .builtin : style {
-      color = white
+      color = light_blue
       textmate_scope = keyword.control
+   }
+   .preproc : style {
+      color = cyan
+      textmate_scope = keyword.control.directive
    }
    .maths : style {
       color = white
@@ -88,13 +95,13 @@ styles [] {
       color = yellow
       textmate_scope = comment
    }
-   .ident : style {
+   .atom : style {
       color = violet
       textmate_scope = variable
    }
    .types : style {
-      color = light_blue
-      textmate_scope = constant
+      color = #ff00ff
+      textmate_scope = constant.language
    }
    .illegal : style {
       background_color = red

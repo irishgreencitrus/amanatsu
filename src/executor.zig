@@ -1,31 +1,30 @@
 const std = @import("std");
 const errors = @import("errors.zig");
 const fmt = std.fmt;
-//const print = std.debug.print;
+const data_types = @import("data_types.zig");
 const parser = @import("parser.zig");
 
-
+const StackNumberType = data_types.UsedNumberType;
 const StackType = enum {
     String,
     Atom,
-    Float,
+    Number,
     TokenList,
-    FloatList,
+    NumberList,
 };
 const StackItem = struct { item_type: StackType, data: union {
     text: []const u8,
-    float: f64,
+    number: StackNumberType,
     token_list: []parser.Token,
-    float_list: []f64,
+    number_list: []StackNumberType,
 } };
-
 
 fn dprint(comptime format: []const u8, args: anytype) void {
     std.log.debug(format, args);
 }
 fn print(comptime format: []const u8, args: anytype) void {
     const stdout = std.io.getStdOut().writer();
-    nosuspend stdout.print(format,args) catch return;
+    nosuspend stdout.print(format, args) catch return;
 }
 
 const Stack = struct {
@@ -34,26 +33,136 @@ const Stack = struct {
     stack_allocator: std.mem.Allocator = undefined,
     bracket_depth: u64 = 0,
     scope_depth: u64 = 0,
+    return_flag: bool = false,
     fn init(self: *Stack, alloc: std.mem.Allocator) !void {
         self.stack_allocator = alloc;
         self.list = try std.ArrayList(StackItem).initCapacity(alloc, 1024);
         self.variables = std.StringHashMap(StackItem).init(alloc);
     }
     fn item_is(_: *Stack, item: StackItem, required_type: StackType) bool {
-        if (item.item_type == required_type) {
-            return true;
-        } else {
-            return false;
-        }
+        return item.item_type == required_type;
     }
-    fn create_float(_: *Stack, value: f64) StackItem {
-        return StackItem{ .item_type = .Float, .data = .{ .float = value } };
+    fn create_numberlist(_: *Stack, value: []StackNumberType) StackItem {
+        return StackItem{ .item_type = .NumberList, .data = .{ .number_list = value } };
+    }
+    fn create_number(_: *Stack, value: StackNumberType) StackItem {
+        return StackItem{ .item_type = .Number, .data = .{ .number = value } };
     }
     fn create_string(_: *Stack, value: []const u8) StackItem {
         return StackItem{ .item_type = .String, .data = .{ .text = value } };
     }
     fn create_atom(_: *Stack, value: []const u8) StackItem {
         return StackItem{ .item_type = .Atom, .data = .{ .text = value } };
+    }
+    fn atom_to_type(_: *Stack, atom: StackItem) ?StackType {
+        if (atom.item_type != .Atom) @panic("atom_to_type called with wrong arguments");
+        if (std.mem.eql(u8, atom.data.text, "Atom")) {
+            return .Atom;
+        }
+        if (std.mem.eql(u8, atom.data.text, "String")) {
+            return .String;
+        }
+        if (std.mem.eql(u8, atom.data.text, "Number")) {
+            return .Number;
+        }
+        if (std.mem.eql(u8, atom.data.text, "TokenList")) {
+            return .TokenList;
+        }
+        if (std.mem.eql(u8, atom.data.text, "NumberList")) {
+            return .NumberList;
+        }
+        return null;
+    }
+    fn builtin_as_type(self: *Stack) !void {
+        const result_type_atom = self.list.pop();
+        const to_convert = self.list.pop();
+        if (!self.item_is(result_type_atom, .Atom)) {
+            errors.executor_panic("'as_type' expected type Atom as resulting type, got type ", result_type_atom.item_type);
+        }
+        const result_type = self.atom_to_type(result_type_atom) orelse
+            errors.panic("Invalid type for 'astype' conversion. Expected one of `Atom` `String` `Number` `TokenList` `NumberList`. Perhaps you misspelt?");
+
+        const current_type = to_convert.item_type;
+
+        // Rules for conversion
+        // t = always
+        // ? = sometimes
+        // Atom =>
+        //   String t
+        // String =>
+        //   Atom ?
+        //   Number ?
+        //   NumberList t :: Get ASCII codes of string value
+        // Number =>
+        //   String t
+        // TokenList =>
+        //   NumberList ?
+        // NumberList =>
+        //   TokenList t
+        //   String t :: Convert back to string using ASCII values
+        var result: ?StackItem = null;
+        switch (current_type) {
+            .Atom => switch (result_type) {
+                .String => result = self.create_string(to_convert.data.text),
+                else => {},
+            },
+            .String => switch (result_type) {
+                .Atom => {
+                    // Check if the String is a valid Atom.
+                    switch (to_convert.data.text[0]) {
+                        '0'...'9' => errors.panic("Failed to convert type String to Atom. String starts with Number, this is invalid in an Atom."),
+                        else => {},
+                    }
+                    for (to_convert.data.text) |n| {
+                        if (!@import("lexer.zig").isIdentifier(n)) {
+                            errors.panic("Failed to convert type String to Atom. String does not conform to Atom naming requirements.");
+                        }
+                    }
+                    result = self.create_atom(to_convert.data.text);
+                },
+                .Number => {
+                    result = self.create_number(std.fmt.parseFloat(StackNumberType, to_convert.data.text) catch errors.panic("Failed to convert type String to Number. String is not a valid Number"));
+                },
+                .NumberList => {
+                    var number_list = std.ArrayList(StackNumberType).init(self.stack_allocator);
+                    for (to_convert.data.text) |n| {
+                        try number_list.append(@intToFloat(StackNumberType, n));
+                    }
+                    result = self.create_numberlist(number_list.toOwnedSlice());
+                },
+                else => {},
+            },
+            .Number => switch (result_type) {
+                .String => result = self.create_string(try std.fmt.allocPrint(self.stack_allocator, "{d}", .{to_convert.data.number})),
+                else => {},
+            },
+            .TokenList => switch (result_type) {
+                .NumberList => {
+                    var number_list = std.ArrayList(StackNumberType).init(self.stack_allocator);
+                    for (to_convert.data.token_list) |t| {
+                        if (t.id != .Number) errors.panic("Failed to convert type TokenList to NumberList. List contains more than just numbers");
+                        try number_list.append(t.data.number);
+                    }
+                    result = self.create_numberlist(number_list.toOwnedSlice());
+                },
+                else => {},
+            },
+            .NumberList => switch (result_type) {
+                .TokenList => {
+                    var token_list = std.ArrayList(parser.Token).init(self.stack_allocator);
+                    for (to_convert.data.number_list) |num| {
+                        try token_list.append(parser.Token{ .id = .Number, .start = 0, .data = .{ .number = num } });
+                    }
+                    result = StackItem{ .item_type = .TokenList, .data = .{ .token_list = token_list.toOwnedSlice() } };
+                },
+                else => {},
+            },
+        }
+        if (result) |r| {
+            try self.list.append(r);
+        } else {
+            errors.executor_panic("Unable to convert types ", .{ current_type, result_type });
+        }
     }
     fn builtin_define(self: *Stack) !void {
         const value = self.list.pop();
@@ -105,10 +214,10 @@ const Stack = struct {
         if (!self.item_is(clause, .TokenList)) {
             errors.executor_panic("'if' expected type TokenList as clause, got type ", clause.item_type);
         }
-        if (!self.item_is(condition, .Float)) {
+        if (!self.item_is(condition, .Number)) {
             errors.executor_panic("'if' expected type Float as condition, got type ", condition.item_type);
         }
-        if (condition.data.float == 1) {
+        if (condition.data.number == 1) {
             for (clause.data.token_list) |tok| {
                 try execute_single_token(tok, current_token_list, self);
             }
@@ -127,10 +236,10 @@ const Stack = struct {
         if (!self.item_is(elseclause, .TokenList)) {
             errors.executor_panic("'ifelse' expected type TokenList as second clause, got type ", elseclause.item_type);
         }
-        if (!self.item_is(condition, .Float)) {
-            errors.executor_panic("'ifelse' expected type Float as condition, got type ", condition.item_type);
+        if (!self.item_is(condition, .Number)) {
+            errors.executor_panic("'ifelse' expected type Number as condition, got type ", condition.item_type);
         }
-        if (condition.data.float == 1) {
+        if (condition.data.number == 1) {
             for (ifclause.data.token_list) |tok| {
                 try execute_single_token(tok, current_token_list, self);
             }
@@ -156,7 +265,7 @@ const Stack = struct {
             for (condition.data.token_list) |tok| {
                 try execute_single_token(tok, current_token_list, self);
             }
-            if (self.list.pop().data.float == 0) {
+            if (self.list.pop().data.number == 0) {
                 break;
             }
             for (clause.data.token_list) |tok| {
@@ -167,18 +276,18 @@ const Stack = struct {
     fn builtin_range(self: *Stack) !void {
         const end = self.list.pop();
         const start = self.list.pop();
-        if (!self.item_is(start, .Float)) {
-            errors.executor_panic("'range' expected type Float as start, got type ", start.item_type);
+        if (!self.item_is(start, .Number)) {
+            errors.executor_panic("'range' expected type Number as start, got type ", start.item_type);
         }
-        if (!self.item_is(end, .Float)) {
-            errors.executor_panic("'range' expected type Float as end, got type ", end.item_type);
+        if (!self.item_is(end, .Number)) {
+            errors.executor_panic("'range' expected type Number as end, got type ", end.item_type);
         }
-        var i = start.data.float;
-        var float_list = std.ArrayList(f64).init(self.stack_allocator);
-        while (i < end.data.float) : (i += 1) {
-            try float_list.append(i);
+        var i = start.data.number;
+        var number_list = std.ArrayList(StackNumberType).init(self.stack_allocator);
+        while (i < end.data.number) : (i += 1) {
+            try number_list.append(i);
         }
-        try self.append(StackItem{ .item_type = .FloatList, .data = .{ .float_list = float_list.toOwnedSlice() } });
+        try self.append(self.create_numberlist(number_list.toOwnedSlice()));
     }
     fn builtin_for(
         self: *Stack,
@@ -193,13 +302,13 @@ const Stack = struct {
         if (!self.item_is(var_name, .Atom)) {
             errors.executor_panic("'for' expected type Atom as iterator variable, got type ", var_name.item_type);
         }
-        if (!self.item_is(list, .FloatList)) {
-            errors.executor_panic("'for' expected type FloatList as the list to iterate over, got type ", list.item_type);
+        if (!self.item_is(list, .NumberList)) {
+            errors.executor_panic("'for' expected type NumberList as the list to iterate over, got type ", list.item_type);
         }
         switch (list.item_type) {
-            .FloatList => {
-                for (list.data.float_list) |fl| {
-                    try self.variables.put(var_name.data.text, self.create_float(fl));
+            .NumberList => {
+                for (list.data.number_list) |fl| {
+                    try self.variables.put(var_name.data.text, self.create_number(fl));
                     for (clause.data.token_list) |tok| {
                         try execute_single_token(tok, current_token_list, self);
                     }
@@ -214,12 +323,15 @@ const Stack = struct {
             .Atom, .String => {
                 print("{s}", .{top.data.text});
             },
-            .Float => {
-                if (std.math.floor(top.data.float) == top.data.float) {
-                    print("{}", .{@floatToInt(i128, top.data.float)});
-                } else {
-                    print("{}", .{top.data.float});
+            .Number => {
+                print("{d}", .{top.data.number});
+            },
+            .NumberList => {
+                print("[", .{});
+                for (top.data.number_list) |n| {
+                    print("{d}, ", .{n});
                 }
+                print("]", .{});
             },
             else => {},
         }
@@ -266,14 +378,31 @@ const Stack = struct {
         if (possible_func) |function_contents| {
             switch (function_contents.item_type) {
                 .TokenList => {
-                    for (function_contents.data.token_list) |tok| {
+                    var prog_pointer: i64 = 0;
+                    while (prog_pointer < function_contents.data.token_list.len) : (prog_pointer += 1) {
+                        var tok = function_contents.data.token_list[@intCast(usize, prog_pointer)];
                         self.scope_depth += 1;
-                        // if (tok.id == .BuiltinReturn) {
-                        //     bracket_depth = 0;
-                        //     return;
+                        defer self.scope_depth -= 1;
+
+                        // if (tok.id == .BuiltinReturn and self.bracket_depth != self.scope_depth) {
+                        //    std.debug.print("RETURN CALLED WITH :: {} {}\n",.{self.bracket_depth, self.scope_depth});
                         // }
+                        if (tok.id == .Function) {
+                            if (std.mem.eql(u8, tok.data.text, name)) {
+                                // Executes on recursion
+                                dprint("RECURSION DETECTED\n", .{});
+                                if (prog_pointer == function_contents.data.token_list.len - 1) {
+                                    dprint("ASSUME TAIL CALL\n", .{});
+                                    prog_pointer = -1;
+                                    continue;
+                                }
+                            }
+                        }
                         try execute_single_token(tok, current_token_list, self);
-                        self.scope_depth -= 1;
+                        if (self.return_flag) {
+                            self.return_flag = false;
+                            return;
+                        }
                     }
                 },
                 else => {
@@ -282,13 +411,13 @@ const Stack = struct {
             }
         } else unreachable;
     }
-    fn builtin_float2int(self: *Stack) !void {
-        const value = self.list.pop();
-        if (!self.item_is(value, .Float)) {
-            errors.executor_panic("float2int expected Float, got ", value.item_type);
-        }
-        try self.append(self.create_float(@floor(value.data.float)));
-    }
+    // fn builtin_float2int(self: *Stack) !void {
+    //    const value = self.list.pop();
+    //    if (!self.item_is(value, .Number)) {
+    //        errors.executor_panic("float2int expected Float, got ", value.item_type);
+    //    }
+    //    try self.append(self.create_number(@floor(value.data.number)));
+    //}
 
     fn append(self: *Stack, value: StackItem) !void {
         try self.list.append(value);
@@ -296,90 +425,90 @@ const Stack = struct {
     fn operator_plus(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Addition operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(b.data.float + a.data.float));
+        try self.append(self.create_number(b.data.number + a.data.number));
     }
     fn operator_minus(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Subtraction operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(b.data.float - a.data.float));
+        try self.append(self.create_number(b.data.number - a.data.number));
     }
     fn operator_divide(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Division operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(b.data.float / a.data.float));
+        try self.append(self.create_number(b.data.number / a.data.number));
     }
     fn operator_multiply(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Multiplication operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(b.data.float * a.data.float));
+        try self.append(self.create_number(b.data.number * a.data.number));
     }
     fn operator_modulo(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Modulus operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@rem(b.data.float, a.data.float)));
+        try self.append(self.create_number(@rem(b.data.number, a.data.number)));
     }
     fn operator_eq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Equality operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float == a.data.float))));
+        try self.append(self.create_number(@intToFloat(StackNumberType, @boolToInt(b.data.number == a.data.number))));
     }
     fn operator_neq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Not equal to operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float != a.data.float))));
+        try self.append(self.create_number(@intToFloat(StackNumberType, @boolToInt(b.data.number != a.data.number))));
     }
     fn operator_lt(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Less than requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float < a.data.float))));
+        try self.append(self.create_number(@intToFloat(StackNumberType, @boolToInt(b.data.number < a.data.number))));
     }
     fn operator_gt(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Greater than requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float > a.data.float))));
+        try self.append(self.create_number(@intToFloat(StackNumberType, @boolToInt(b.data.number > a.data.number))));
     }
     fn operator_lteq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Less than or equal operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float <= a.data.float))));
+        try self.append(self.create_number(@intToFloat(StackNumberType, @boolToInt(b.data.number <= a.data.number))));
     }
     fn operator_gteq(self: *Stack) !void {
         const a = self.list.pop();
         const b = self.list.pop();
-        if (!(self.item_is(a, .Float) and self.item_is(b, .Float))) {
+        if (!(self.item_is(a, .Number) and self.item_is(b, .Number))) {
             errors.executor_panic("Greater than or equal operator requires two numbers, got ", .{ b.item_type, a.item_type });
         }
-        try self.append(self.create_float(@intToFloat(f64, @boolToInt(b.data.float >= a.data.float))));
+        try self.append(self.create_number(@intToFloat(StackNumberType, @boolToInt(b.data.number >= a.data.number))));
     }
 };
 // Bracket Depth tells us if we're inside a quote
@@ -391,40 +520,35 @@ fn execute_single_token(
 ) !void {
     //print("DEBUG :: EXECUTE SINGLE TOKEN CALLED WITH {any} {any} {any} {any} {any}\n",.{t , raw_data, bracket_depth.*, current_token_list.*, stack.*});
     //std.debug.print("SCOPE, BRACKET DEPTH :: {}, {}, {}\n",.{stack.*.scope_depth,stack.*.bracket_depth , t.id});
+    if (stack.*.return_flag) return;
     if (stack.*.bracket_depth == 0) {
         switch (t.id) {
             .Eof => {
                 return;
             },
-            .Comment => {
-                @panic("Comment was not parsed properly");
+            .PreProcUse, .Comment => unreachable,
+            .BracketLeft => stack.*.bracket_depth += 1,
+            .BracketRight => errors.panic("Brackets are not balanced. A left bracket must always precede a right one."),
+            .Number => {
+                try stack.*.append(stack.*.create_number(t.data.number));
             },
-            .BracketLeft => {
-                stack.*.bracket_depth += 1;
-            },
-            .BracketRight => {
-                errors.panic("Brackets are not balanced. A left bracket must always precede a right one.");
-            },
-            .Float => {
-                dprint("FLOAT APPEND :: {}",.{t.data.num});
-                try stack.*.append(stack.*.create_float(t.data.num));
-            },
-            .BuiltinFloatToInt => {
-                try stack.*.builtin_float2int();
-            },
+            //.BuiltinFloatToInt => {
+            //    try stack.*.builtin_float2int();
+            //},
             .String => {
-                dprint("STRING APPEND :: {any}",.{t.data.str});
-                try stack.*.append(stack.*.create_string(t.data.str));
+                try stack.*.append(stack.*.create_string(t.data.text));
             },
             .Atom => {
-                dprint("ATOM APPEND :: {any}",.{t.data.str});
-                try stack.*.append(stack.*.create_atom(t.data.str));
+                try stack.*.append(stack.*.create_atom(t.data.text));
             },
             .Function => {
                 try stack.*.execute_function(
-                    t.data.str,
+                    t.data.text,
                     current_token_list,
                 );
+            },
+            .BuiltinAsType => {
+                try stack.*.builtin_as_type();
             },
             .BuiltinRange => {
                 try stack.*.builtin_range();
@@ -449,6 +573,9 @@ fn execute_single_token(
                 try stack.*.builtin_local_define();
             },
             .BuiltinRequireStack => {},
+            .BuiltinReturn => {
+                stack.*.return_flag = true;
+            },
             .BuiltinFor => {
                 try stack.*.builtin_for(
                     current_token_list,
@@ -498,7 +625,6 @@ fn execute_single_token(
             .OperatorGreaterThanOrEqual => {
                 try stack.*.operator_gteq();
             },
-            else => {},
         }
     } else {
         switch (t.id) {
