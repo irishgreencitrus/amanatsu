@@ -83,7 +83,7 @@ pub const Token = struct {
         String,
     };
     pub const keywords = std.ComptimeStringMap(Id, .{
-        .{ "local", .BuiltinLocalDefine},
+        .{ "local", .BuiltinLocalDefine },
         .{ "global", .BuiltinDefine },
         .{ "dup", .BuiltinDup },
         .{ "for", .BuiltinFor },
@@ -98,7 +98,7 @@ pub const Token = struct {
         .{ "while", .BuiltinWhile },
     });
     pub const directives = std.ComptimeStringMap(Id, .{
-        .{ "@use", .PreProcUse},
+        .{ "@use", .PreProcUse },
     });
 };
 pub const Tokenizer = struct {
@@ -389,65 +389,5 @@ test "atomics" {
     try expectTokens(":hello_there :this_atomic", &[_]Token.Id{
         .Atom,
         .Atom,
-    });
-}
-test "types_arent_functions" {
-    try expectTokens("String string Atom atom Bool", &[_]Token.Id{
-        .TypeString,
-        .Function,
-        .TypeAtom,
-        .Function,
-        .TypeBool,
-    });
-}
-test "project_euler_one_snip" {
-    try expectTokens(":project_euler_one [ :sum 0 define 1 1000 range :i [ [i 5 % 0.0 =", &[_]Token.Id{
-        .Atom,
-        .BracketLeft,
-        .Atom,
-        .Float,
-        .Function,
-        .Float,
-        .Float,
-        .Function,
-        .Atom,
-        .BracketLeft,
-        .BracketLeft,
-        .Function,
-        .Float,
-        .OperatorModulo,
-        .Float,
-        .OperatorEqual,
-    });
-}
-test "fibonnaci_func" {
-    try expectTokens(":fib [[Int] require_stack :n pop define [n 2 <=] [n] if n 1 - fib n 2 - fib fib", &[_]Token.Id{
-        .Atom,
-        .BracketLeft,
-        .BracketLeft,
-        .TypeInt,
-        .BracketRight,
-        .Function,
-        .Atom,
-        .Function,
-        .Function,
-        .BracketLeft,
-        .Function,
-        .Float,
-        .OperatorLessThanOrEqual,
-        .BracketRight,
-        .BracketLeft,
-        .Function,
-        .BracketRight,
-        .Function,
-        .Function,
-        .Float,
-        .OperatorMinus,
-        .Function,
-        .Function,
-        .Float,
-        .OperatorMinus,
-        .Function,
-        .Function,
     });
 }
