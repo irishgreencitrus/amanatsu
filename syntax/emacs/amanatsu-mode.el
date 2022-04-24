@@ -42,10 +42,12 @@
           (,amnt-keywords-regexp . 'font-lock-function-name-face)
           (,amnt-types-regexp . 'font-lock-type-face))))
 
+;;;###autoload
 (define-derived-mode amanatsu-mode prog-mode "Amanatsu" "A major mode for the Amanatsu programming language."
   (setq font-lock-defaults '((amanatsu-mode-highlights)))
   (setq font-lock-multiline t)
   (setq syntax-propertize-function 'amanatsu-syntax-propertize-function))
+;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.amnt\\'" . amanatsu-mode))
 (provide 'amanatsu-mode)
 ;;; amanatsu-mode.el ends here
