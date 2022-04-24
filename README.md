@@ -4,11 +4,11 @@
 [![GitHub issues](https://img.shields.io/github/issues/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/issues) [![GitHub forks](https://img.shields.io/github/forks/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/network) [![GitHub stars](https://img.shields.io/github/stars/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/stargazers) [![GitHub license](https://img.shields.io/github/license/irishgreencitrus/amanatsu)](https://github.com/irishgreencitrus/amanatsu/blob/main/LICENSE) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/irishgreencitrus/amanatsu?color=orange&label=commits) 
 
 
+
 ![VSCode Syntax](https://img.shields.io/badge/vscode-supported-brightgreen)
-
 ![Atom Syntax](https://img.shields.io/badge/atom-supported-brightgreen)
-
 ![Vim Syntax](https://img.shields.io/badge/vim-supported-brightgreen)
+![Emacs Syntax](https://img.shields.io/badge/emacs-supported-brightgreen)
 
 The progressive, concatenative, stack-based programming language to rival verbosity and complexity.
 ## Installation
